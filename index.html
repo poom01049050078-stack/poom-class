@@ -845,10 +845,59 @@ sbody.addEventListener("click",async ev=>{
   try{ await navigator.clipboard.writeText(inp.value); msg.textContent="복사했어요"; }
   catch(e){ inp.focus(); inp.select(); msg.textContent="선택됐어요 · Ctrl+C로 복사하세요"; }
 });
+
+/* ===== 구글 시트 연결 (홈페이지용): 시트의 종목·전달사항을 읽어 모든 기기에 같은 내용 표시 ===== */
+const SHEET_ID="1e6EsqgdsWtzTxOalNjiDsZuM3TDBd09HP1w05Cf6V7Y";
+const SHEET_EDIT=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
+const NAME2G={"이달의 품새":"품새","기술발차기":"기술발차기"};
+Object.values(PLAN.days).forEach(e=>{ const a=Array.isArray(e)?e:(e&&e.items)||[]; a.forEach(r=>{ const it=strToItem(r); NAME2G[it.n]=it.g; }); });
+function parseCSV(t){
+  const rows=[]; let row=[], f="", q=false;
+  for(let i=0;i<t.length;i++){ const c=t[i];
+    if(q){ if(c==='"'){ if(t[i+1]==='"'){ f+='"'; i++; } else q=false; } else f+=c; }
+    else if(c==='"') q=true; else if(c===','){ row.push(f); f=""; }
+    else if(c==='\n'||c==='\r'){ if(c==='\r'&&t[i+1]==='\n') i++; row.push(f); rows.push(row); row=[]; f=""; }
+    else f+=c; }
+  if(f!==""||row.length){ row.push(f); rows.push(row); }
+  return rows;
+}
+function nameToItem(raw){
+  raw=raw.trim(); if(!raw) return null;
+  if(raw.includes(":")){ const [g,...n]=raw.split(":"); const gg=g.trim(); return {g:GROUPS[gg]?gg:"기타", n:n.join(":").trim()||gg}; }
+  return {g:NAME2G[raw]||"기타", n:raw};
+}
+let sheetSig="";
+async function loadSheet(){
+  try{
+    const r=await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&_=${Date.now()}`,{cache:"no-store"});
+    if(!r.ok) throw new Error(r.status);
+    const txt=await r.text(); if(/^\s*</.test(txt)) throw new Error("not csv");
+    const rows=parseCSV(txt); const head=rows.shift().map(h=>h.trim());
+    const iDay=head.indexOf("일"), iNote=head.indexOf("전달사항"), iItems=head.map((h,i)=>h.startsWith("종목")?i:-1).filter(i=>i>=0);
+    if(iDay<0) throw new Error("no header");
+    const next={};
+    rows.forEach(r=>{ const d=parseInt(r[iDay],10); if(!d||!PLAN.days[d]) return;
+      const o={}; const items=iItems.map(i=>nameToItem(r[i]||"")).filter(Boolean);
+      if(items.length && !isSpecial(d)) o.items=items;
+      const n=(iNote>=0?(r[iNote]||""):"").trim(); if(n) o.notice=n;
+      next[d]=o; });
+    const sig=JSON.stringify(next);
+    if(sig!==sheetSig){ sheetSig=sig; Object.keys(STORE).forEach(k=>delete STORE[k]); Object.assign(STORE,next); if(!vpOpen) render(deck[cur]&&deck[cur].sid); }
+    const t=new Date(); setStatus(`시트 연결됨 · ${t.getHours()}:${String(t.getMinutes()).padStart(2,"0")}`);
+  }catch(e){ setStatus("시트를 못 읽었어요 · 공유 설정 확인",true); }
+}
+function startSheet(){
+  if(!LOCK){ const a=document.createElement("a"); a.href=SHEET_EDIT; a.target="_blank"; a.rel="noopener"; a.textContent="📝 시트에서 수정";
+    a.style.cssText="background:#40382f;color:#f5ede3;border-radius:10px;height:40px;padding:0 12px;font:700 15px/40px var(--f-body);text-decoration:none;white-space:nowrap";
+    document.getElementById("savest").before(a); }
+  loadSheet(); setInterval(loadSheet,60000);
+  document.addEventListener("visibilitychange",()=>{ if(!document.hidden) loadSheet(); });
+}
 /* 공유 저장소 연결: 다른 기기에서 고친 내용도 바로 반영 */
 (async()=>{
   let user=null;
   try{ [db,user]=await Promise.all([window.claude?.use?.("db")??null, window.claude?.use?.("user")??null]); }catch(e){ db=null; }
+  if(!db && EMBED){ editBtn.hidden=true; startSheet(); return; }
   if(!db){
     localOnly=true; canWrite=true;
     try{ Object.assign(STORE, JSON.parse(localStorage.getItem("poom-days")||"{}")); }catch(e){}
