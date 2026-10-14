@@ -851,7 +851,7 @@ sbody.addEventListener("click",async ev=>{
 /* ===== 구글 시트 연결 (홈페이지용): 시트의 종목·전달사항을 읽어 모든 기기에 같은 내용 표시 ===== */
 const SHEET_ID="1e6EsqgdsWtzTxOalNjiDsZuM3TDBd09HP1w05Cf6V7Y";
 /* Apps Script 웹 앱 주소 (시트 읽기·쓰기). 비어 있으면 공개 시트를 읽기만 합니다 */
-const API_URL="";
+const API_URL="https://script.google.com/macros/s/AKfycbxTFX_Vj8AKhtBHvbFYSBAaAp1BBEw2ecJWVdA76Mxv0hYBokXT0KuCr8xlvATMiFl0/exec";
 const SHEET_EDIT=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
 const NAME2G={"이달의 품새":"품새","기술발차기":"기술발차기"};
 Object.values(PLAN.days).forEach(e=>{ const a=Array.isArray(e)?e:(e&&e.items)||[]; a.forEach(r=>{ const it=strToItem(r); NAME2G[it.n]=it.g; }); });
