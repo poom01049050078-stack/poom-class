@@ -697,10 +697,11 @@ function applyEditable(){
   });
 }
 editBtn.onclick=()=>{
+  if(EMBED && API_URL && !editing && !getPin()){ askPin(); return; }
   editing=!editing; document.body.classList.toggle("editing",editing);
   editBtn.classList.toggle("on",editing); editBtn.textContent=editing?"✓ 수정 끝":"✏ 수정";
   itemsBtn.hidden=!editing;
-  if(!editing){ document.getElementById("drawer").hidden=true; render(deck[cur]&&deck[cur].sid); }
+  if(!editing){ document.getElementById("drawer").hidden=true; render(deck[cur]&&deck[cur].sid); if(EMBED&&API_URL) setTimeout(loadSheet,1500); }
   else applyEditable();
 };
 stage.addEventListener("paste",ev=>{ if(!ev.target.closest("[data-k]")) return; ev.preventDefault(); const t=(ev.clipboardData||window.clipboardData).getData("text"); document.execCommand("insertText",false,t); });
@@ -731,6 +732,7 @@ function queueSave(d){
   timers[d]=setTimeout(()=>{
     const body=clone(st(d)); body.updated=Date.now();
     chains[d]=(chains[d]||Promise.resolve()).then(async()=>{
+      if(EMBED && API_URL){ await postDay(d); return; }
       if(localOnly||!db){ try{ const all=JSON.parse(localStorage.getItem("poom-days")||"{}"); all[d]=body; localStorage.setItem("poom-days",JSON.stringify(all)); setStatus("이 기기에 저장됨"); }catch(e){ setStatus("저장 실패",true); } return; }
       try{ await db.doc("days/d"+d).set(body); setStatus("저장됨 ✓"); }
       catch(e){
@@ -848,6 +850,8 @@ sbody.addEventListener("click",async ev=>{
 
 /* ===== 구글 시트 연결 (홈페이지용): 시트의 종목·전달사항을 읽어 모든 기기에 같은 내용 표시 ===== */
 const SHEET_ID="1e6EsqgdsWtzTxOalNjiDsZuM3TDBd09HP1w05Cf6V7Y";
+/* Apps Script 웹 앱 주소 (시트 읽기·쓰기). 비어 있으면 공개 시트를 읽기만 합니다 */
+const API_URL="";
 const SHEET_EDIT=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
 const NAME2G={"이달의 품새":"품새","기술발차기":"기술발차기"};
 Object.values(PLAN.days).forEach(e=>{ const a=Array.isArray(e)?e:(e&&e.items)||[]; a.forEach(r=>{ const it=strToItem(r); NAME2G[it.n]=it.g; }); });
@@ -869,22 +873,64 @@ function nameToItem(raw){
 let sheetSig="";
 async function loadSheet(){
   try{
-    const r=await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&_=${Date.now()}`,{cache:"no-store"});
-    if(!r.ok) throw new Error(r.status);
-    const txt=await r.text(); if(/^\s*</.test(txt)) throw new Error("not csv");
-    const rows=parseCSV(txt); const head=rows.shift().map(h=>h.trim());
+    if(editing) return;
+    let rows;
+    if(API_URL){ const r=await fetch(API_URL+"?_="+Date.now()); const j=await r.json(); if(!j.ok) throw new Error("api"); rows=j.rows; }
+    else { const r=await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&_=${Date.now()}`,{cache:"no-store"});
+      if(!r.ok) throw new Error(r.status);
+      const txt=await r.text(); if(/^\s*</.test(txt)) throw new Error("not csv"); rows=parseCSV(txt); }
+    const head=rows.shift().map(h=>String(h).trim()); const iExtra=head.indexOf("추가설정");
     const iDay=head.indexOf("일"), iNote=head.indexOf("전달사항"), iItems=head.map((h,i)=>h.startsWith("종목")?i:-1).filter(i=>i>=0);
     if(iDay<0) throw new Error("no header");
     const next={};
     rows.forEach(r=>{ const d=parseInt(r[iDay],10); if(!d||!PLAN.days[d]) return;
       const o={}; const items=iItems.map(i=>nameToItem(r[i]||"")).filter(Boolean);
       if(items.length && !isSpecial(d)) o.items=items;
-      const n=(iNote>=0?(r[iNote]||""):"").trim(); if(n) o.notice=n;
+      const n=(iNote>=0?String(r[iNote]||""):"").trim(); if(n) o.notice=n;
+      if(iExtra>=0 && r[iExtra]){ try{ const x=JSON.parse(r[iExtra]); if(x.texts) o.texts=x.texts; if(Array.isArray(x.det)&&o.items) x.det.forEach((dd,k)=>{ if(o.items[k]&&dd) Object.assign(o.items[k],dd); }); }catch(e){} }
       next[d]=o; });
     const sig=JSON.stringify(next);
     if(sig!==sheetSig){ sheetSig=sig; Object.keys(STORE).forEach(k=>delete STORE[k]); Object.assign(STORE,next); if(!vpOpen) render(deck[cur]&&deck[cur].sid); }
     const t=new Date(); setStatus(`시트 연결됨 · ${t.getHours()}:${String(t.getMinutes()).padStart(2,"0")}`);
-  }catch(e){ setStatus("시트를 못 읽었어요 · 공유 설정 확인",true); }
+  }catch(e){ setStatus(API_URL?"시트 연결 실패 · 잠시 뒤 다시 시도":"시트를 못 읽었어요 · 공유 설정 확인",true); }
+}
+/* 홈페이지에서 고친 내용을 시트에 저장 (Apps Script 연결) */
+function getPin(){ try{ return localStorage.getItem("poom-pin")||""; }catch(e){ return ""; } }
+function rowFor(d){
+  const s=STORE[d]||{}; const out={day:d, notice:s.notice||""};
+  const ex={}; if(s.texts&&Object.keys(s.texts).length) ex.texts=s.texts;
+  if(!isSpecial(d)){
+    const items=itemsFor(d);
+    out.items=items.map(it=> (NAME2G[it.n]===it.g || (it.g==="기타"&&!NAME2G[it.n])) ? it.n : `${it.g}:${it.n}`);
+    const det=items.map(it=>{ const o={}; ["sub","how","v","ytx","lo","hi"].forEach(f=>{ if(it[f]!=null) o[f]=it[f]; }); return Object.keys(o).length?o:null; });
+    if(det.some(Boolean)) ex.det=det;
+  }
+  out.extra=Object.keys(ex).length?ex:null;
+  return out;
+}
+async function postDay(d){
+  try{
+    const body=Object.assign({pin:getPin()}, rowFor(d));
+    const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)});
+    const j=await r.json();
+    if(j.ok){ setStatus("시트에 저장됨 ✓"); sheetSig=""; }
+    else if(j.error==="pin"){ try{localStorage.removeItem("poom-pin")}catch(e){} setStatus("비밀번호가 바뀌었어요 · 다시 입력",true); if(editing) editBtn.click(); }
+    else setStatus("저장 실패 · 다시 시도해 주세요",true);
+  }catch(e){ setStatus("저장 실패 · 인터넷 연결 확인",true); }
+}
+function askPin(){
+  const box=document.getElementById("sharebox"); box.querySelector("h3").textContent="수정 비밀번호";
+  document.getElementById("drawer").hidden=true;
+  sbody.innerHTML=`<div class="it"><p class="hint">관장님이 정한 수정용 비밀번호를 입력하세요. 이 기기에서는 한 번만 입력하면 됩니다.</p>
+    <input type="password" id="pinin" inputmode="numeric" autocomplete="off" aria-label="수정 비밀번호" style="width:100%;box-sizing:border-box">
+    <div class="row"><button class="dbtn" id="pinok">확인</button><span class="hint" id="pinmsg"></span></div></div>`;
+  box.hidden=false; document.getElementById("pinin").focus();
+  const go=async()=>{ const v=document.getElementById("pinin").value.trim(), m=document.getElementById("pinmsg"); if(!v) return; m.textContent="확인 중…";
+    try{ const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({pin:v,check:true})}); const j=await r.json();
+      if(j.ok){ try{localStorage.setItem("poom-pin",v)}catch(e){} box.hidden=true; editBtn.click(); }
+      else m.textContent="비밀번호가 맞지 않아요"; }catch(e){ m.textContent="연결 실패 · 잠시 뒤 다시"; } };
+  document.getElementById("pinok").onclick=go;
+  document.getElementById("pinin").onkeydown=e=>{ if(e.key==="Enter") go(); };
 }
 function startSheet(){
   if(!LOCK){ const a=document.createElement("a"); a.href=SHEET_EDIT; a.target="_blank"; a.rel="noopener"; a.textContent="📝 시트에서 수정";
@@ -897,7 +943,7 @@ function startSheet(){
 (async()=>{
   let user=null;
   try{ [db,user]=await Promise.all([window.claude?.use?.("db")??null, window.claude?.use?.("user")??null]); }catch(e){ db=null; }
-  if(!db && EMBED){ editBtn.hidden=true; startSheet(); return; }
+  if(!db && EMBED){ canWrite=!!API_URL&&!LOCK; editBtn.hidden=!canWrite; startSheet(); return; }
   if(!db){
     localOnly=true; canWrite=true;
     try{ Object.assign(STORE, JSON.parse(localStorage.getItem("poom-days")||"{}")); }catch(e){}
