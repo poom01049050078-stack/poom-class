@@ -264,6 +264,9 @@ a.vbtn{text-decoration:none}
 .flow.dense .tx{font-size:42px;padding:9px 0}
 .flow.dense .tx small{font-size:24px}
 .flow.dense li + li::before{left:27px;top:-10px;height:20px}
+.s-act .sw{position:absolute;right:120px;top:120px;z-index:4;display:flex;flex-direction:column;align-items:flex-end;gap:16px}
+.s-act .swt{font:400 190px/1 var(--f-display);color:var(--ink);background:var(--paper);border-radius:32px;padding:20px 40px;font-variant-numeric:tabular-nums;box-shadow:0 10px 0 rgba(90,70,50,.12)}
+.s-act .swb{display:flex;gap:12px}
 </style>
 
 <div id="viewport"><div id="stage"></div></div>
@@ -402,7 +405,7 @@ const ACT = {
   "기본발차기":{sub:"띠별 커리큘럼 · 발차기", photo:"m_kick_pair", how:["영상으로 발차기 모양을 먼저 봐요","무릎을 먼저 높이 들어요","차고 나서 빠르게 제자리로!"]},
   "긴줄넘기":{sub:"두 친구가 돌리는 긴 줄 안으로!", photo:"m_cheer", cue:"rope", how:["줄이 바닥을 칠 때 들어가요","친구와 박자를 맞춰 넘어요","걸려도 괜찮아, 다시 도전!"]},
   "짝줄넘기":{sub:"줄 하나로 친구와 함께", photo:"m_pair_red", cue:"rope", how:["짝과 나란히 서서 줄을 함께 돌려요","'하나, 둘' 구호로 박자를 맞춰요","짝의 말에 귀 기울이기 = 경청!"]},
-  "왕중왕전":{sub:"줄넘기 왕은 누구?", photo:"m_trophy", cue:"rope", how:["걸리지 않고 끝까지 넘어요","친구를 큰 소리로 응원해요","결과보다 끝까지 하는 마음!"]},
+  "왕중왕전":{sub:"누가 가장 오래 뛰나! 끝까지 남는 친구가 줄넘기 왕", photo:"m_trophy", music:"club", timer:true, how:["다 함께 \"시작!\" 소리에 맞춰 뛰어요","줄에 걸리면 자리에 앉아 친구를 응원해요","마지막까지 남은 친구가 오늘의 왕!"]},
   "피라미드 줄넘기":{sub:"단계별로 도전!", photo:"m_cheer", cue:"rope", how:["사범님 설명을 잘 듣고 시작해요","한 단계씩 차근차근 올라가요","걸려도 괜찮아, 다시 도전!"]},
   "기술발차기":{sub:"정확한 자세로 힘차게!", photo:"m_kick_red", how:["준비 자세를 바르게","목표를 보고 정확하게 차요","차고 나서 균형을 지켜요"]},
   "물구나무서기 · 옆돌기":{sub:"매트 위에서 안전하게", photo:"m_cheer", how:["손목 · 어깨 준비운동을 꼭 해요","사범님 보조와 함께 도전해요","차례를 지키고 매트 밖에서는 기다려요"]},
@@ -423,6 +426,11 @@ const DAYPLUS = {
             pair: "짝과 함께: 한 명은 차고, 한 명은 높이를 봐 주고 끝까지 말해 주기", table: "assets/kick_table.webp" }
   }
 };
+const CLUB = [
+  {src:"assets/club1.mp3", name:"클럽 · josh pan"},
+  {src:"assets/club2.mp3", name:"클럽 · Yah Yah · josh pan"},
+  {src:"assets/club3.mp3", name:"클럽 · Broken heart · Dan K"}
+];
 const TRACKS = [
   {src:"assets/bgm1.mp3", name:"Fast and Run · Nico Staf"},
   {src:"assets/bgm2.mp3", name:"Meet & Fun! · Ofshane"},
@@ -564,8 +572,9 @@ function buildDeck(d){
     }
     const cue=a.cue?CUES[a.cue]:null;
     const how=[0,1,2,3].map(j=>{const t=itemField(it,"how",j);return `<li class="${t?"":"empty"}"><b>${j+1}</b>${E(`item:${idx}:how:${j}`,t)}</li>`}).join("");
-    S.push({sid:"i"+idx, label:it.n, music:"bgm", cls:"s-act", html:`${deco}<div class="halo"></div>${brand}
-      <div class="kicker"><span class="chip">${esc(GROUPS[it.g]||it.g)}</span></div>
+    S.push({sid:"i"+idx, label:it.n, music:a.music||"bgm", cls:"s-act", html:`${deco}<div class="halo"></div>${brand}
+      ${a.timer?`<div class="sw"><span class="swt" data-swt>00:00</span><div class="swb"><button class="btn" data-sw="go">▶ 시작</button><button class="btn dark" data-sw="reset">처음부터</button></div></div>`:""}
+      <div class="kicker"><span class="chip">${esc(GROUPS[it.g]||it.g)}</span>${a.music==="club"?`<span class="chip red">♪ 클럽 음악</span>`:""}</div>
       <h2 class="${it.n.length>6?"long":""}">${E(`item:${idx}:n`,it.n)}</h2>${E(`item:${idx}:sub`,itemField(it,"sub"),"div","sub")}
       <ul class="how">${how}</ul>
       <div class="acts2">${cue?`<button class="btn" data-cue="${a.cue}">▶ ${esc(cue.label)}</button>`:""}${vidButtons(vids,it.ytx)}</div>
@@ -662,6 +671,7 @@ document.getElementById("dprev").onclick=()=>{const k=dayList.indexOf(curDay); o
 document.getElementById("dnext").onclick=()=>{const k=dayList.indexOf(curDay); openDay(curDay==="month"||k===dayList.length-1?"month":dayList[k+1]);};
 stage.addEventListener("click",ev=>{
   const yl=ev.target.closest("[data-ytlink]"); if(yl){ stopCue(false); bgm.pause(); trackEl.textContent="▶ 유튜브 새 창에서 재생 중 · 돌아오면 ♪ 음악을 눌러 주세요"; return; }
+  const sw=ev.target.closest("[data-sw]"); if(sw){ swClick(sw); return; }
   const im=ev.target.closest("[data-img]"); if(im){ openImage(im.dataset.img, im.dataset.imgt||""); return; }
   const v=ev.target.closest("[data-video]"); if(v){ openVideo(v.dataset.video); return; }
   const c=ev.target.closest("[data-cue]"); if(c){ toggleCue(c.dataset.cue,c); return; }
@@ -690,11 +700,12 @@ let musicOn=false, ti=Math.floor(Math.random()*TRACKS.length), nowKind=null;
 try{const v=localStorage.getItem("poom-vol"); if(v!==null) vol.value=v;}catch(e){}
 bgm.volume=+vol.value; cue.volume=Math.min(1,+vol.value+0.3);
 vol.oninput=()=>{bgm.volume=+vol.value; cue.volume=Math.min(1,+vol.value+0.3); try{localStorage.setItem("poom-vol",vol.value)}catch(e){}};
-function setSrc(kind){ const t = kind==="med" ? MED : TRACKS[ti]; nowKind=kind; bgm.src=t.src; trackEl.textContent="♪ "+t.name; }
+let ci=0;
+function setSrc(kind){ const t = kind==="med" ? MED : kind==="club" ? CLUB[ci] : TRACKS[ti]; nowKind=kind; bgm.src=t.src; trackEl.textContent="♪ "+t.name; }
 function playBgm(){ bgm.play().then(()=>{playBtn.classList.add("on")}).catch(()=>{trackEl.textContent="♪ 음악 버튼을 한 번 더 눌러 주세요"}); }
 function syncMusic(){
   if(!musicOn || !cue.paused || vpOpen) return;
-  const want=deck[cur]&&deck[cur].music==="med"?"med":"bgm";
+  const want=(deck[cur]&&deck[cur].music)||"bgm";
   if(want!==nowKind || !bgm.src){ setSrc(want); playBgm(); }
   else if(bgm.paused) playBgm();
 }
@@ -703,9 +714,9 @@ function toggleMusic(){
   if(musicOn){ playBtn.classList.add("on"); syncMusic(); }
   else { bgm.pause(); playBtn.classList.remove("on"); trackEl.textContent="음악 꺼짐"; }
 }
-bgm.addEventListener("ended",()=>{ if(nowKind==="bgm") ti=(ti+1)%TRACKS.length; setSrc(nowKind); playBgm(); });
+bgm.addEventListener("ended",()=>{ if(nowKind==="bgm") ti=(ti+1)%TRACKS.length; if(nowKind==="club") ci=(ci+1)%CLUB.length; setSrc(nowKind); playBgm(); });
 playBtn.onclick=toggleMusic;
-document.getElementById("skip").onclick=()=>{ ti=(ti+1)%TRACKS.length; musicOn=true; playBtn.classList.add("on"); setSrc("bgm"); playBgm(); };
+document.getElementById("skip").onclick=()=>{ const k=nowKind==="club"?"club":"bgm"; if(k==="club") ci=(ci+1)%CLUB.length; else ti=(ti+1)%TRACKS.length; musicOn=true; playBtn.classList.add("on"); setSrc(k); playBgm(); };
 
 let cueBtn=null;
 function toggleCue(key,btn){
@@ -742,6 +753,17 @@ function openVideo(key){
   const load=()=>{ el.src=`video/v_${key}_${String(p).padStart(3,"0")}.mp4`; partEl.textContent=v.parts>1?`${p+1} / ${v.parts}`:""; el.play().catch(()=>{}); };
   el.addEventListener("ended",()=>{ if(p<v.parts-1){ p++; load(); } });
   load();
+}
+/* 왕중왕전 스톱워치 */
+let swT0=0, swAcc=0, swRun=null;
+function swShow(){ const ms=swAcc+(swRun?Date.now()-swT0:0), t=Math.floor(ms/1000); stage.querySelectorAll("[data-swt]").forEach(el=>el.textContent=`${String(Math.floor(t/60)).padStart(2,"0")}:${String(t%60).padStart(2,"0")}`); stage.querySelectorAll('[data-sw="go"]').forEach(b=>b.textContent=swRun?"■ 멈춤":(swAcc?"▶ 계속":"▶ 시작")); }
+function swClick(b){
+  const go=stage.querySelector('.slide.on [data-sw="go"]');
+  if(b.dataset.sw==="go"){
+    if(swRun){ swAcc+=Date.now()-swT0; clearInterval(swRun); swRun=null; go.textContent="▶ 계속"; }
+    else { swT0=Date.now(); swRun=setInterval(swShow,250); go.textContent="■ 멈춤"; if(!musicOn){ musicOn=true; playBtn.classList.add("on"); } syncMusic(); }
+  } else { clearInterval(swRun); swRun=null; swAcc=0; if(go) go.textContent="▶ 시작"; }
+  swShow();
 }
 function openImage(src,title){
   closeVideo(); vpOpen=true;
