@@ -230,7 +230,7 @@ body.editing .how li.empty span:empty::before{content:"(설명 추가)";color:va
 [data-k]{white-space:pre-line}
 .s-notice .ntext{white-space:pre-wrap}
 
-body.locked #dprev, body.locked #dsel, body.locked #dnext, body.locked #share, body.locked #edit, body.locked #items{display:none!important}
+body.locked #grp, body.locked #dprev, body.locked #dsel, body.locked #dnext, body.locked #share, body.locked #edit, body.locked #items{display:none!important}
 #sharebox{position:fixed;top:0;right:0;width:min(520px,100vw);z-index:16;background:var(--paper);color:var(--ink);box-shadow:-10px 0 30px rgba(0,0,0,.3);
   display:flex;flex-direction:column;font:500 15px/1.4 var(--f-body);max-height:calc(100% - 64px - env(safe-area-inset-bottom,0px));padding-right:env(safe-area-inset-right,0px)}
 #sharebox header{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid #e2d8cc}
@@ -268,6 +268,7 @@ a.vbtn{text-decoration:none}
 .s-act .sw{position:absolute;right:120px;top:120px;z-index:4;display:flex;flex-direction:column;align-items:flex-end;gap:16px}
 .s-act .swt{font:400 190px/1 var(--f-display);color:var(--ink);background:var(--paper);border-radius:32px;padding:20px 40px;font-variant-numeric:tabular-nums;box-shadow:0 10px 0 rgba(90,70,50,.12)}
 .s-act .swb{display:flex;gap:12px}
+#bar .grpbtn{background:#5d6e45}
 </style>
 
 <div id="viewport"><div id="stage"></div></div>
@@ -289,6 +290,7 @@ a.vbtn{text-decoration:none}
   <button id="skip" class="hide-s" aria-label="다음 곡">다음 곡</button>
   <span id="track">음악 꺼짐</span>
   <input id="vol" type="range" min="0" max="1" step="0.05" value="0.6" aria-label="음량">
+  <button id="grp" class="grpbtn"></button>
   <button id="share">🔗 오늘만 공유</button>
   <button id="fs">전체화면</button>
 </div>
@@ -319,7 +321,11 @@ a.vbtn{text-decoration:none}
 
 <script>
 /* ===== 한 달 기본 데이터 (화면의 '수정'으로 바꾼 내용은 따로 저장되어 이 위에 덮어씁니다) ===== */
-const PLAN = {
+/* 반 선택: 주소 끝 #yu… 이면 유치부, 아니면 초등부 */
+const RAWH=(location.hash||"").slice(1);
+const GROUP=/^yu(-|$)/.test(RAWH)?"yu":"cho";
+const HP=GROUP==="yu"?"yu-":"";
+const PLAN_CHO = {
   year: 2026, month: 10, group: "초등부",
   virtue: { word: "경청", def: "다른 사람들의 말을 잘 듣고 마음으로 잘 받아들임",
     missions: ["말하는 사람의 눈을 바라봐요", "친구 말이 끝날 때까지 기다려요", "사범님 말씀에 '네!' 하고 대답해요",
@@ -356,6 +362,38 @@ const PLAN = {
   }
 };
 
+const PLAN_YU = {
+  year: 2026, month: 10, group: "유치부",
+  virtue: PLAN_CHO.virtue, poomsae: PLAN_CHO.poomsae,
+  days: {
+    1:  ["명상", "매트운동:에어매트 점프운동"],
+    2:  ["명상", "제미타프로그램:재미타 발차기"],
+    3:  PLAN_CHO.days[3], 5: PLAN_CHO.days[5], 9: PLAN_CHO.days[9], 10: PLAN_CHO.days[10],
+    6:  ["준비운동:시청각준비운동", "유아체육:기초 점프운동", "커리큘럼:태극 3장"],
+    7:  ["준비운동:바른체형교정", "유아체육:징검다리 훈련", "커리큘럼:기본막기"],
+    8:  ["줄넘기:원 줄넘기", "음악프로그램:태권체조"],
+    12: ["인성교육", "유아체육:지그재그 달리기", "커리큘럼:기본발차기 앞차기"],
+    13: ["준비운동:바른체형교정", "유아체육:왕복 점프운동", "커리큘럼:태극 3장"],
+    14: ["준비운동:키성장스트레칭", "유아체육:중심잡기 운동", "커리큘럼:기본서기"],
+    15: ["줄넘기:시계 돌리기", "음악프로그램:태권체조"],
+    16: {items:["유아체육:종합장애물", "발표력:태권도를 배우는 목적"], event:"1박2일 합숙"},
+    17: PLAN_CHO.days[17],
+    19: ["인성교육", "유아체육:협동심 달리기", "커리큘럼:기본발차기 돌려차기"],
+    20: ["준비운동:키성장스트레칭", "유아체육:미션 임파서블", "커리큘럼:기본동작"],
+    21: ["준비운동:폼롤러스트레칭", "유아체육:점프 달리기", "커리큘럼:태극 3장"],
+    22: ["명상", "매트운동:에어매트 매달리기"],
+    23: ["명상", "제미타프로그램:격파"],
+    24: PLAN_CHO.days[24],
+    26: ["인성교육", "유아체육:미션 달리기", "커리큘럼:기본발차기 내려차기"],
+    27: ["준비운동:폼롤러스트레칭", "유아체육:균형감각 훈련", "커리큘럼:손날격파"],
+    28: ["준비운동:시청각준비운동", "유아체육:단계별 점프운동", "커리큘럼:태극 3장"],
+    29: ["명상", "레크레이션:공던지기"],
+    30: ["유아체육:종합장애물", "발표력:태권도를 배우는 목적"],
+    31: PLAN_CHO.days[31]
+  }
+};
+const PLAN = GROUP==="yu" ? PLAN_YU : PLAN_CHO;
+
 /* 품태권도 영상 커리큘럼 (D:\curriculrum\품태권도 에서 변환) */
 const VIDEOS = {
   hand_white:{label:"기본손동작 · 흰띠", short:"흰띠", yt:"mAbP19fA7tU"},
@@ -384,6 +422,7 @@ const VIDEOS = {
 /* 유튜브를 화면 안에서 재생할 수 있는 곳(우리 홈페이지)인지: 아티팩트 안에서는 새 창으로 엽니다 */
 const EMBED = /github\.io$/.test(location.hostname) || /[?&]embed=1/.test(location.search);
 const DEFAULT_VIDEOS = {
+  "태극 3장":["poom3"], "기본발차기 앞차기":["kick_front"], "기본발차기 돌려차기":["kick_round"], "재미타 발차기":["kick_front","kick_round","kick_side"],
   "기본손동작":["hand_white","hand_ygb","hand_po","hand_red"],
   "기본발차기":["kick_front","kick_round","kick_side","kick_back","kick_hook"],
   "앞차기":["kick_front"],
@@ -391,10 +430,43 @@ const DEFAULT_VIDEOS = {
   "준비운동":["warmup"],
   "마무리 인사":["belt","dobok"]
 };
-const GROUPS = {"PAPS":"PAPS 체력측정","커리큘럼":"커리큘럼교육","품새":"이달의 품새","줄넘기":"줄넘기","기술발차기":"기술발차기","매트운동":"매트운동","제미타프로그램":"재미타 프로그램","기타":"오늘의 수련"};
-const GROUP_PHOTO = {"PAPS":"m_cheer","커리큘럼":"m_punch","품새":"m_poomsae","줄넘기":"m_pair_red","기술발차기":"m_kick_red","매트운동":"m_cheer","제미타프로그램":"m_break","기타":"m_pair_red"};
+const GROUPS = {"PAPS":"PAPS 체력측정","커리큘럼":"커리큘럼교육","품새":"이달의 품새","줄넘기":"줄넘기","기술발차기":"기술발차기","매트운동":"매트운동","제미타프로그램":"재미타 프로그램","준비운동":"준비운동","유아체육":"유아체육","음악프로그램":"음악프로그램","발표력":"발표력","레크레이션":"레크레이션","기타":"오늘의 수련"};
+const GROUP_PHOTO = {"PAPS":"m_cheer","커리큘럼":"m_punch","품새":"m_poomsae","줄넘기":"m_pair_red","기술발차기":"m_kick_red","매트운동":"m_cheer","제미타프로그램":"m_break","준비운동":"m_cheer","유아체육":"m_group_yellow","음악프로그램":"m_girl_yellow","발표력":"m_bow","레크레이션":"m_group_yellow","기타":"m_pair_red"};
 
 const ACT = {
+  "시청각준비운동":{sub:"화면을 보며 따라 하는 준비운동", photo:"m_cheer", how:["화면 속 동작을 잘 봐요","박자에 맞춰 크게 따라 해요","다치지 않게 천천히 시작!"]},
+  "바른체형교정":{sub:"구부정한 몸을 쭉! 바른 자세 만들기", photo:"m_poomsae", how:["허리와 어깨를 쭉 펴요","배꼽에 힘을 꽉!","거울을 보며 바른 자세 확인"]},
+  "키성장스트레칭":{sub:"쭉쭉 늘려요, 쑥쑥 자라요", photo:"m_cheer", how:["팔을 하늘로 쭉 뻗어요","다리를 쭉 펴고 10초 버티기","숨은 천천히 들이쉬고 내쉬어요"]},
+  "폼롤러스트레칭":{sub:"폼롤러로 몸을 시원하게", photo:"m_sit_pair", how:["폼롤러 위에 천천히 올라가요","천천히 굴려요","아프면 바로 사범님께 말해요"]},
+  "기초 점프운동":{sub:"두 발 모아 콩콩!", photo:"m_group_yellow", how:["두 발을 모아요","무릎을 살짝 굽혀 콩콩 뛰어요","착지는 사뿐히!"]},
+  "징검다리 훈련":{sub:"징검다리를 하나씩 건너요", photo:"m_group_yellow", how:["다음 발판을 잘 보고","한 발씩 정확하게 딛어요","떨어지지 않게 균형 잡기!"]},
+  "지그재그 달리기":{sub:"콘 사이를 요리조리", photo:"m_group_yellow", how:["콘에 부딪히지 않게","몸을 낮추고 방향 바꾸기","차례를 지켜 출발해요"]},
+  "왕복 점프운동":{sub:"왔다 갔다 점프!", photo:"m_group_yellow", how:["출발선에서 두 발 모으기","점프로 반대편까지","돌아올 때도 끝까지!"]},
+  "중심잡기 운동":{sub:"한 발로 서서 버티기", photo:"m_girl_yellow", how:["한 발을 들고 팔을 옆으로","눈은 앞을 봐요","5초 버티기 도전!"]},
+  "협동심 달리기":{sub:"친구와 함께 달려요", photo:"m_group_yellow", how:["친구 손을 꼭 잡아요","친구 속도에 맞춰 달려요","함께 도착하면 성공!"]},
+  "미션 임파서블":{sub:"미션을 해결하며 통과!", photo:"m_group_yellow", how:["사범님 미션을 끝까지 들어요 (경청!)","장애물을 하나씩 통과해요","끝까지 포기하지 않기!"]},
+  "점프 달리기":{sub:"달리다가 점프!", photo:"m_group_yellow", how:["신호에 맞춰 출발","장애물 앞에서 점프","착지 후 계속 달려요"]},
+  "미션 달리기":{sub:"사범님 미션을 해결하며 달려요", photo:"m_group_yellow", how:["미션을 끝까지 듣고 출발 (경청!)","미션을 해결하고 돌아와요","친구를 큰 소리로 응원해요"]},
+  "균형감각 훈련":{sub:"흔들흔들 균형 잡기", photo:"m_girl_yellow", how:["팔을 벌려 균형을 잡아요","천천히 한 걸음씩","넘어져도 다시 도전!"]},
+  "단계별 점프운동":{sub:"한 단계씩 점프 도전!", photo:"m_group_yellow", how:["낮은 단계부터 시작","성공하면 다음 단계로","무리하지 않고 안전하게"]},
+  "종합장애물":{sub:"모든 장애물 통과하기", photo:"m_group_yellow", how:["순서를 잘 듣고 기억해요","차례대로 출발해요","끝까지 완주하면 성공!"]},
+  "에어매트 점프운동":{sub:"폭신폭신 에어매트에서 점프!", photo:"m_cheer", how:["한 명씩 차례대로 올라가요","가운데에서 뛰어요","내려올 때는 사범님 손 잡고"]},
+  "에어매트 매달리기":{sub:"매달려서 힘 기르기", photo:"m_cheer", how:["두 손으로 꽉 잡아요","팔에 힘 주고 버티기","내려올 때는 사뿐히"]},
+  "원 줄넘기":{sub:"줄을 돌려 한 번씩 넘어요", photo:"m_girl_yellow", how:["줄을 뒤에서 앞으로 돌려요","줄이 발 앞에 오면 점프!","천천히 한 개씩 성공!"]},
+  "시계 돌리기":{sub:"빙글빙글 도는 줄을 넘어요", photo:"m_group_yellow", how:["사범님이 줄을 돌려요","줄이 오면 점프!","걸려도 괜찮아, 다시 도전!"]},
+  "태권체조":{sub:"천하무적 태권도", photo:"m_girl_yellow", how:["음악을 잘 들어요","박자에 맞춰 힘차게!","기합은 크게!"]},
+  "재미타 발차기":{sub:"재미있게 배우는 발차기", photo:"m_kick_red", how:["무릎을 먼저 높이 들어요","목표를 보고 차요","차고 나서 균형 잡기!"]},
+  "격파":{sub:"재미타 격파 도전!", photo:"m_break", how:["목표를 잘 봐요","정확한 자세로 힘차게","격파 후 인사!"]},
+  "태극 3장":{sub:"커리큘럼 · 품새", photo:"m_poomsae", how:["영상으로 순서를 먼저 봐요","한 동작씩 정확하게","끝나면 바른 자세로 마무리"]},
+  "기본막기":{sub:"커리큘럼 · 막기", photo:"m_punch", how:["아래막기 · 몸통막기 · 얼굴막기","막는 손은 힘차게","반대 손은 허리로 당겨요"]},
+  "기본서기":{sub:"커리큘럼 · 서기", photo:"m_poomsae", how:["1번 모아서기 · 2번 편히서기","3번 주춤서기 · 4번 앞서기","5번 앞굽이"]},
+  "기본동작":{sub:"커리큘럼 · 기본동작", photo:"m_punch", how:["사범님 구령을 잘 들어요","절도 있게 한 동작씩","기합은 크게!"]},
+  "손날격파":{sub:"커리큘럼 · 격파", photo:"m_break", how:["손날 모양을 바르게","목표를 보고 정확하게","격파 후 인사!"]},
+  "기본발차기 앞차기":{sub:"커리큘럼 · 기본발차기", photo:"m_kick_red", how:["무릎을 가슴까지 높이 들어요","발끝을 세우고 앞으로 쭉!","찬 발은 빠르게 접어서 내려요"]},
+  "기본발차기 돌려차기":{sub:"커리큘럼 · 기본발차기", photo:"m_kick_pair", how:["무릎을 옆으로 들어요","몸을 돌리며 발등으로 차요","차고 나서 제자리로!"]},
+  "기본발차기 내려차기":{sub:"커리큘럼 · 기본발차기", photo:"m_kick_red", how:["다리를 높이 들어 올려요","위에서 아래로 내려 차요","균형을 잃지 않게!"]},
+  "태권도를 배우는 목적":{sub:"발표력 · 친구들 앞에서 크게 말해요", photo:"m_bow", how:["몸과 마음을 단련하여 강인한! 정신력과 용기를 길러","약한 자를 돕고! 훌륭한 사람이 되기 위해","태! 권! 도! 를 배웁니다"]},
+  "공던지기":{sub:"레크레이션", photo:"m_group_yellow", how:["공을 두 손으로 잡아요","목표를 보고 던져요","친구가 던질 땐 기다려요"]},
   "셔틀런":{sub:"심폐지구력 · 20m 왕복오래달리기", photo:"m_cheer", cue:"shuttle", how:["신호음이 울리면 20m를 달려 선을 밟아요","다음 신호음까지 반대편 선에 도착해요","신호음보다 늦게 도착하면 경고, 두 번이면 끝!","끝까지 포기하지 않는 것이 오늘의 목표"]},
   "제자리멀리뛰기":{sub:"순발력", photo:"m_kick_red", how:["두 발을 모으고 출발선 뒤에 서요","팔을 크게 흔들어 반동을 만들어요","두 발로 동시에 멀리 뛰어 착지해요","출발선에서 가까운 발뒤꿈치까지 재요"]},
   "악력":{sub:"근력 · 손으로 쥐는 힘", photo:"m_punch", cue:"60s", how:["악력계를 손에 맞게 조절해요","팔을 쭉 펴고 몸에 붙이지 않아요","힘껏 3초 동안 꽉 쥐어요","왼손 · 오른손 번갈아 측정해요"]},
@@ -414,7 +486,7 @@ const ACT = {
   "이달의 품새":{sub:"", photo:"m_poomsae", how:[]}
 };
 /* ===== 날짜별 추가 자료 (D 드라이브 자료에서 가져옴) ===== */
-const DAYPLUS = {
+const DAYPLUS = GROUP!=="cho" ? {} : {
   15: {
     src: "2024-10-15 수업일지 · 품태권도 기술발차기 단계표(2024)",
     goal: "경청의 마음 심기",
@@ -465,6 +537,7 @@ const clone=o=>JSON.parse(JSON.stringify(o));
 function strToItem(raw){
   if(raw==="품새") return {g:"품새", n:"이달의 품새"};
   if(raw==="기술발차기") return {g:"기술발차기", n:"기술발차기"};
+  if(raw==="명상"||raw==="인성교육") return {g:raw, n:raw};
   const [k,v]=raw.split(":"); return {g:k, n:v||k};
 }
 function defaultItems(d){ const e=PLAN.days[d]; const arr=Array.isArray(e)?e:(e&&e.items)||[]; return arr.map(strToItem); }
@@ -514,7 +587,9 @@ function buildDeck(d){
       <h2>${nl(title)}</h2>${E("sp.text",textFor(d,"sp.text",e.text),"p")}</div>
       <img class="art ${/^h_/.test(e.img)?"card":""}" src="assets/${e.img}.webp" alt="${esc(title.replace(/\n/g," "))}"></div>`}, noticeSlide(d)];
   }
-  const items=itemsFor(d);
+  const allItems=itemsFor(d);
+  const items=allItems.filter(it=>it.g!=="명상"&&it.g!=="인성교육");
+  const hasWarmItem=items.some(it=>it.g==="준비운동");
   const S=[]; const DP=DAYPLUS[d]||null; const TM=(DP&&DP.times)||{};
   S.push({sid:"cover", label:"오늘은", music:"bgm", cls:"s-cover", html:`<div class="blob b1"></div><div class="dots"></div><div class="olivebar"></div>
     <div class="hello">오늘은</div>
@@ -522,8 +597,8 @@ function buildDeck(d){
     <div class="q">${E("cover.q",textFor(d,"cover.q","오늘의 수업은??"))}</div>
     ${DP&&DP.goal?`<div class="goal"><i>오늘의 목표</i>${E("cover.goal",textFor(d,"cover.goal",DP.goal))}</div>`:""}
     <div class="acts"><button class="btn dark" data-cue="start">▶ 수련 시작 음성</button>${vidButtons(DEFAULT_VIDEOS["마무리 인사"])}</div>
-    <img class="photo" src="assets/m_pair_red.webp" alt="도복을 입은 품태권도 모델 수련생 두 명">`});
-  const flow=[...(DP&&DP.start?[["시작 멘트",TM["시작 멘트"]||""]]:[]),["음악 명상",""],["이달의 인성",PLAN.virtue.word],["준비운동",TM["준비운동"]||"스트레칭"],
+    <img class="photo" src="assets/${GROUP==="yu"?"m_group_yellow":"m_pair_red"}.webp" alt="도복을 입은 품태권도 모델 수련생들">`});
+  const flow=[...(DP&&DP.start?[["시작 멘트",TM["시작 멘트"]||""]]:[]),["음악 명상",""],["이달의 인성",PLAN.virtue.word],...(hasWarmItem?[]:[["준비운동",TM["준비운동"]||"스트레칭"]]),
     ...items.map((it,k)=>[it.n, (it.g==="품새"?`${itemField(it,"lo")} · ${itemField(it,"hi")}`:GROUPS[it.g]||it.g)+(k===0&&TM["본운동"]?` · 본운동 ${TM["본운동"]}`:""), true]),
     ...(DP&&DP.end?[["종료 멘트",TM["종료 멘트"]||""]]:[]),["마무리 인사",TM["마무리"]||""],["전달사항",""]];
   S.push({sid:"flow", label:"오늘의 수업", music:"bgm", cls:"s-flow", html:`${deco}${brand}
@@ -546,13 +621,13 @@ function buildDeck(d){
     <div class="mission"><i>오늘의 경청 실천</i>${E("virtue.m",textFor(d,"virtue.m",mi))}</div>
     <img class="photo" src="assets/m_sit_listen.webp" alt="바르게 앉아 있는 품태권도 모델 수련생들">`});
   const wh=["목 · 어깨 · 손목 돌리기","다리 · 발목 스트레칭","제자리 뛰기로 몸에 열을 올려요",""];
-  S.push({sid:"warm", label:"준비운동", music:"bgm", cls:"s-act warm", html:`${deco}<div class="halo"></div>${brand}
+  if(!hasWarmItem) S.push({sid:"warm", label:"준비운동", music:"bgm", cls:"s-act warm", html:`${deco}<div class="halo"></div>${brand}
     <div class="kicker"><span class="chip">준비운동</span><span class="chip olive">Warming up</span></div>
     <h2>준비운동</h2>${E("warm.sub",textFor(d,"warm.sub","몸을 깨워요! 다치지 않게 꼼꼼하게"),"div","sub")}
     <ul class="how">${wh.map((h,j)=>{const t=textFor(d,"warm.h"+j,h);return `<li class="${t?"":"empty"}"><b>${j+1}</b>${E("warm.h"+j,t)}</li>`}).join("")}</ul>
     <div class="acts2">${vidButtons(DEFAULT_VIDEOS["준비운동"])}</div>
     <img class="photo" src="assets/m_cheer.webp" alt="두 팔을 들어 응원하는 모델 수련생">`});
-  items.forEach((it,idx)=>{
+  items.forEach((it)=>{ const idx=allItems.indexOf(it);
     const a=ACT[it.n]||{}, vids=videosOf(it), photo=a.photo||GROUP_PHOTO[it.g]||"m_pair_red";
     if(it.g==="품새"){
       S.push({sid:"i"+idx, label:it.n, music:"bgm", cls:"s-act", html:`${deco}<div class="halo"></div>${brand}
@@ -636,7 +711,7 @@ function render(keepSid){
 function openDay(d, slideIndex=0){
   curDay=d; dsel.value=String(d);
   render(); if(slideIndex) show(slideIndex);
-  if(!LOCK){ try{history.replaceState(null,"","#"+(d==="month"?"month":"d"+d))}catch(e){} }
+  if(!LOCK){ try{history.replaceState(null,"","#"+HP+(d==="month"?"month":"d"+d))}catch(e){} }
 }
 function show(i, quiet){
   const els=stage.querySelectorAll(".slide");
@@ -897,7 +972,7 @@ dbody.addEventListener("click",ev=>{
 });
 
 /* ===== 시작 ===== */
-const h=(location.hash||"").slice(1);
+const h=RAWH.replace(/^yu-?/,"");
 /* 공유 전용 링크: #today = 매일 그날 수업만, #only-d14 = 14일 수업만 (날짜 이동·수정 숨김) */
 const LOCK = h==="today" ? "today" : (/^only-d\d+$/.test(h) && PLAN.days[+h.slice(6)] ? "day" : null);
 const startDay = LOCK==="today" ? (todayDay()==="month"?dayList[dayList.length-1]:todayDay()) : LOCK==="day" ? +h.slice(6) :
@@ -916,6 +991,10 @@ document.getElementById("quiet").onclick=()=>begin(false);
 try{navigator.wakeLock&&navigator.wakeLock.request("screen").catch(()=>{});}catch(e){}
 
 
+/* ===== 초등부 ↔ 유치부 ===== */
+const grpBtn=document.getElementById("grp");
+grpBtn.textContent = GROUP==="yu" ? "🔁 초등부 보기" : "🔁 유치부 보기";
+grpBtn.onclick=()=>{ const c = curDay==="month" ? "month" : "d"+curDay; location.hash="#"+(GROUP==="yu"?"":"yu-")+c; location.reload(); };
 /* ===== 오늘만 공유 ===== */
 const SHARE_BASE = EMBED ? (location.origin+location.pathname) : "https://claude.ai/artifact/ChbmzXnNccXC4S5CbEfVA5";
 const sharebox=document.getElementById("sharebox"), sbody=document.getElementById("sbody");
@@ -927,8 +1006,8 @@ document.getElementById("share").onclick=()=>{
   document.getElementById("drawer").hidden=true;
   const d = curDay==="month" ? (todayDay()==="month"?dayList[0]:todayDay()) : curDay;
   const e=PLAN.days[d];
-  sbody.innerHTML = shareRow(`${M}월 ${d}일 (${DOW_KO[dateOf(d).getDay()]}) 수업만`, "이 날짜의 수업 PPT 한 벌만 열려요. 날짜 이동·한 달 보기·수정 버튼은 보이지 않아요.", `${SHARE_BASE}#only-d${d}`, "l1")
-    + shareRow("매일 바뀌는 '오늘 수업' 링크", "한 번 저장해 두면 열 때마다 그날 수업만 보여 줘요. 도장 TV 즐겨찾기에 좋아요.", `${SHARE_BASE}#today`, "l2")
+  sbody.innerHTML = shareRow(`${M}월 ${d}일 (${DOW_KO[dateOf(d).getDay()]}) 수업만`, "이 날짜의 수업 PPT 한 벌만 열려요. 날짜 이동·한 달 보기·수정 버튼은 보이지 않아요.", `${SHARE_BASE}#${HP}only-d${d}`, "l1")
+    + shareRow("매일 바뀌는 '오늘 수업' 링크", "한 번 저장해 두면 열 때마다 그날 수업만 보여 줘요. 도장 TV 즐겨찾기에 좋아요.", `${SHARE_BASE}#${HP}today`, "l2")
     + `<p class="hint">링크를 받은 사람이 주소 끝(#…)을 지우면 전체 달력도 볼 수 있어요. 완전히 따로 떼어 내야 하면 말씀해 주세요.</p>`;
   sharebox.hidden=false;
 };
@@ -943,6 +1022,8 @@ sbody.addEventListener("click",async ev=>{
 /* ===== 구글 시트 연결 (홈페이지용): 시트의 종목·전달사항을 읽어 모든 기기에 같은 내용 표시 ===== */
 const SHEET_ID="1e6EsqgdsWtzTxOalNjiDsZuM3TDBd09HP1w05Cf6V7Y";
 /* Apps Script 웹 앱 주소 (시트 읽기·쓰기). 비어 있으면 공개 시트를 읽기만 합니다 */
+const TAB = GROUP==="yu" ? "유치부" : "";
+let tabMissing=false;
 const API_URL="https://script.google.com/macros/s/AKfycbxTFX_Vj8AKhtBHvbFYSBAaAp1BBEw2ecJWVdA76Mxv0hYBokXT0KuCr8xlvATMiFl0/exec";
 const SHEET_EDIT=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
 const NAME2G={"이달의 품새":"품새","기술발차기":"기술발차기"};
@@ -967,7 +1048,9 @@ async function loadSheet(){
   try{
     if(editing) return;
     let rows;
-    if(API_URL){ const r=await fetch(API_URL+"?_="+Date.now()); const j=await r.json(); if(!j.ok) throw new Error("api"); rows=j.rows; }
+    if(API_URL){ const r=await fetch(API_URL+"?tab="+encodeURIComponent(TAB)+"&_="+Date.now()); const j=await r.json(); if(!j.ok) throw new Error("api");
+      if(TAB && j.tab!==TAB){ tabMissing=true; editBtn.hidden=true; setStatus("유치부 시트 연결 준비 중 · 기본 계획표로 표시"); return; }
+      rows=j.rows; }
     else { const r=await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&_=${Date.now()}`,{cache:"no-store"});
       if(!r.ok) throw new Error(r.status);
       const txt=await r.text(); if(/^\s*</.test(txt)) throw new Error("not csv"); rows=parseCSV(txt); }
@@ -1002,7 +1085,7 @@ function rowFor(d){
 }
 async function postDay(d){
   try{
-    const body=Object.assign({pin:getPin()}, rowFor(d));
+    const body=Object.assign({pin:getPin(), tab:TAB}, rowFor(d));
     const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)});
     const j=await r.json();
     if(j.ok){ setStatus("시트에 저장됨 ✓"); sheetSig=""; }
