@@ -244,7 +244,8 @@ body.locked #dprev, body.locked #dsel, body.locked #dnext, body.locked #share, b
 a.vbtn{text-decoration:none}
 .s-cover .goal{position:absolute;left:112px;top:810px;display:flex;gap:18px;align-items:center;font:400 52px/1 var(--f-display);color:var(--ink)}
 .s-cover .goal i{font-style:normal;font:700 28px/1 var(--f-body);background:var(--olive);color:#fff;border-radius:999px;padding:12px 22px}
-.s-cover .acts{bottom:60px}
+.s-cover .acts{bottom:60px;align-items:center;flex-wrap:wrap}
+.s-cover .acts .vbtn{font-size:32px;padding:22px 32px}
 .s-talk .kicker{position:absolute;left:110px;top:150px;display:flex;gap:14px}
 .s-talk h2{position:absolute;left:104px;top:230px;margin:0;font:400 150px/1 var(--f-display)}
 .s-talk .promise{position:absolute;left:110px;top:430px;width:1100px;margin:0;padding:0;display:flex;flex-direction:column;gap:18px}
@@ -390,7 +391,7 @@ const DEFAULT_VIDEOS = {
   "준비운동":["warmup"],
   "마무리 인사":["belt","dobok"]
 };
-const GROUPS = {"PAPS":"PAPS 체력측정","커리큘럼":"커리큘럼교육","품새":"이달의 품새","줄넘기":"줄넘기","기술발차기":"기술발차기","매트운동":"매트운동","제미타프로그램":"제미타프로그램","기타":"오늘의 수련"};
+const GROUPS = {"PAPS":"PAPS 체력측정","커리큘럼":"커리큘럼교육","품새":"이달의 품새","줄넘기":"줄넘기","기술발차기":"기술발차기","매트운동":"매트운동","제미타프로그램":"재미타 프로그램","기타":"오늘의 수련"};
 const GROUP_PHOTO = {"PAPS":"m_cheer","커리큘럼":"m_punch","품새":"m_poomsae","줄넘기":"m_pair_red","기술발차기":"m_kick_red","매트운동":"m_cheer","제미타프로그램":"m_break","기타":"m_pair_red"};
 
 const ACT = {
@@ -417,6 +418,8 @@ const DAYPLUS = {
   15: {
     src: "2024-10-15 수업일지 · 품태권도 기술발차기 단계표(2024)",
     goal: "경청의 마음 심기",
+    next: "10월 16일(금) · 재미타 발차기",
+    notice: "1. 플리스 추가구매 가능!\n2. 자전거, 킥보드 꼭 자물쇠 채우기\n3. 내일은 7, 8시부 수업이 없습니다!",
     tips: ["수업 난이도는 낮게, 즐겁게! 멘토제 적극 활용", "칭찬은 디테일하게!", "안전과 질서가 무너지지 않도록"],
     start: ["사범님이 말할 때는 동작을 멈춰요", "말하는 사람의 눈을 바라봐요", "끝까지 듣고 \"네!\" 하고 대답해요"],
     end: ["오늘 친구 말, 사범님 말을 끝까지 들었나요?", "잘 듣는 사람이 더 빨리 배우고, 친구도 많아져요"],
@@ -494,7 +497,7 @@ function vidButtons(list, extra){
 }
 
 function noticeSlide(d){
-  const dow=dateOf(d).getDay(), txt=(STORE[d]&&STORE[d].notice)||"";
+  const dow=dateOf(d).getDay(), txt=(STORE[d]&&STORE[d].notice)||((DAYPLUS[d]&&DAYPLUS[d].notice)||"");
   return {sid:"notice", label:"전달사항", music:"bgm", cls:"s-notice", html:`${brand}
     <div class="nh"><h2>오늘의 전달사항</h2><span>${M}월 ${d}일 ${DOW_LONG[dow]}</span></div>
     <div class="pin"></div>
@@ -518,7 +521,7 @@ function buildDeck(d){
     <div class="bigd"><small>${M}월</small> ${d}일</div><div class="dw">${DOW_LONG[dow]}</div>
     <div class="q">${E("cover.q",textFor(d,"cover.q","오늘의 수업은??"))}</div>
     ${DP&&DP.goal?`<div class="goal"><i>오늘의 목표</i>${E("cover.goal",textFor(d,"cover.goal",DP.goal))}</div>`:""}
-    <div class="acts"><button class="btn dark" data-cue="start">▶ 수련 시작 음성</button></div>
+    <div class="acts"><button class="btn dark" data-cue="start">▶ 수련 시작 음성</button>${vidButtons(DEFAULT_VIDEOS["마무리 인사"])}</div>
     <img class="photo" src="assets/m_pair_red.webp" alt="도복을 입은 품태권도 모델 수련생 두 명">`});
   const flow=[...(DP&&DP.start?[["시작 멘트",TM["시작 멘트"]||""]]:[]),["음악 명상",""],["이달의 인성",PLAN.virtue.word],["준비운동",TM["준비운동"]||"스트레칭"],
     ...items.map((it,k)=>[it.n, (it.g==="품새"?`${itemField(it,"lo")} · ${itemField(it,"hi")}`:GROUPS[it.g]||it.g)+(k===0&&TM["본운동"]?` · 본운동 ${TM["본운동"]}`:""), true]),
@@ -583,7 +586,7 @@ function buildDeck(d){
   const nd=dayList.find(x=>x>d && !isSpecial(x));
   const nextTxt = nd ? `${M}월 ${nd}일(${DOW_KO[dateOf(nd).getDay()]}) · ${itemsFor(nd).map(i=>i.n).join(" · ")}` : "다음 달 수련계획을 기대해 주세요!";
   const evt = e.event ? `<div class="next" style="background:var(--blue);color:#fff"><i style="color:#dfe6ff">오늘의 일정</i>${E("end.evt",textFor(d,"end.evt",e.event+" 출발! 선생님 말씀 잘 듣고 안전하게"))}</div>` : "";
-  if(DP&&DP.end) S.push({sid:"talk2", label:"종료 멘트", music:"med", cls:"s-talk end2", html:`${deco}${brand}
+  if(DP&&DP.end) S.push({sid:"talk2", label:"종료 멘트", music:"bgm", cls:"s-talk end2", html:`${deco}${brand}
     <div class="kicker"><span class="chip">종료 멘트</span>${TM["종료 멘트"]?`<span class="chip olive">${esc(TM["종료 멘트"])}</span>`:""}</div>
     <h2>오늘 잘 들었나요?</h2>
     <ol class="promise">${DP.end.map((t,j)=>`<li><b>${j+1}</b>${E("talk2.l"+j,textFor(d,"talk2.l"+j,t))}</li>`).join("")}</ol>
@@ -592,8 +595,7 @@ function buildDeck(d){
   S.push({sid:"end", label:"마무리 인사", music:"bgm", cls:"s-end", html:`<div class="blob b1" style="background:#c7b5a3"></div><div class="dots"></div>
     <div class="msg">${E("end.msg",textFor(d,"end.msg","오늘도 최선을 다한\n품태권도 친구들!"),"span","","")}</div>
     <div class="shout">품! <span>파이팅!</span></div>
-    ${evt || `<div class="next"><i>다음 수업 미리보기</i><span>${esc(nextTxt)}</span></div>`}
-    <div class="endvids">${vidButtons(DEFAULT_VIDEOS["마무리 인사"])}</div>
+    ${evt || `<div class="next"><i>다음 수업 미리보기</i>${E("end.next",textFor(d,"end.next",(DP&&DP.next)||nextTxt))}</div>`}
     <img class="photo" src="assets/m_bow.webp" alt="인사하는 모델 수련생">`});
   S.push(noticeSlide(d));
   return S;
@@ -850,7 +852,7 @@ function renderDrawer(){
     items.forEach((it,i)=>{
       const vids=videosOf(it);
       h+=`<div class="it" data-i="${i}">
-        <div class="row"><select data-f="g" aria-label="종류">${Object.keys(GROUPS).map(g=>`<option value="${g}" ${g===it.g?"selected":""}>${g}</option>`).join("")}</select>
+        <div class="row"><select data-f="g" aria-label="종류">${Object.keys(GROUPS).map(g=>`<option value="${g}" ${g===it.g?"selected":""}>${esc(GROUPS[g])}</option>`).join("")}</select>
           <input type="text" data-f="n" value="${esc(it.n)}" aria-label="종목 이름">
           <button class="mini" data-act="up" aria-label="위로">↑</button><button class="mini" data-act="down" aria-label="아래로">↓</button><button class="mini del" data-act="del" aria-label="삭제">✕</button></div>
         <details ${vids.length?"open":""}><summary>영상 ${vids.length?`(${vids.length}개)`:"없음"}</summary>
