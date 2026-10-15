@@ -230,7 +230,7 @@ body.editing .how li.empty span:empty::before{content:"(설명 추가)";color:va
 [data-k]{white-space:pre-line}
 .s-notice .ntext{white-space:pre-wrap}
 
-body.locked #grp, body.locked #dprev, body.locked #dsel, body.locked #dnext, body.locked #share, body.locked #edit, body.locked #items{display:none!important}
+body.locked #grp, body.locked #dprev, body.locked #dsel, body.locked #dnext, body.locked #share{display:none!important}
 #sharebox{position:fixed;top:0;right:0;width:min(520px,100vw);z-index:16;background:var(--paper);color:var(--ink);box-shadow:-10px 0 30px rgba(0,0,0,.3);
   display:flex;flex-direction:column;font:500 15px/1.4 var(--f-body);max-height:calc(100% - 64px - env(safe-area-inset-bottom,0px));padding-right:env(safe-area-inset-right,0px)}
 #sharebox header{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid #e2d8cc}
@@ -574,7 +574,7 @@ function noticeSlide(d){
   return {sid:"notice", label:"전달사항", music:"bgm", cls:"s-notice", html:`${brand}
     <div class="nh"><h2>오늘의 전달사항</h2><span>${M}월 ${d}일 ${DOW_LONG[dow]}</span></div>
     <div class="pin"></div>
-    <div class="board"><div class="ntext" data-k="notice" data-ph="${canWrite&&!LOCK?"✏ 수정을 누르고 여기에 전달사항을 적어 주세요":"오늘은 전달사항이 없어요"}">${esc(txt)}</div></div>`};
+    <div class="board"><div class="ntext" data-k="notice" data-ph="${canWrite?"✏ 수정을 누르고 여기에 전달사항을 적어 주세요":"오늘은 전달사항이 없어요"}">${esc(txt)}</div></div>`};
 }
 
 function buildDeck(d){
@@ -1118,16 +1118,16 @@ function startSheet(){
 (async()=>{
   let user=null;
   try{ [db,user]=await Promise.all([window.claude?.use?.("db")??null, window.claude?.use?.("user")??null]); }catch(e){ db=null; }
-  if(!db && EMBED){ canWrite=!!API_URL&&!LOCK; editBtn.hidden=!canWrite; startSheet(); return; }
+  if(!db && EMBED){ canWrite=!!API_URL; editBtn.hidden=!canWrite; startSheet(); return; }
   if(!db){
     localOnly=true; canWrite=true;
     try{ Object.assign(STORE, JSON.parse(localStorage.getItem("poom-days")||"{}")); }catch(e){}
-    editBtn.hidden=!!LOCK; if(!LOCK) setStatus("이 기기에만 저장");
+    editBtn.hidden=false; if(!LOCK) setStatus("이 기기에만 저장");
     render(deck[cur]&&deck[cur].sid); return;
   }
   let w=null; try{ w = user ? await user.can("data.write") : null; }catch(e){}
   canWrite = w!==false;
-  editBtn.hidden=!canWrite||!!LOCK;
+  editBtn.hidden=!canWrite;
   db.collection("days").onSnapshot(snap=>{
     let touched=false;
     snap.docChanges().forEach(ch=>{
