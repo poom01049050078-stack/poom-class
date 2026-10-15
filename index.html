@@ -242,6 +242,28 @@ body.locked #dprev, body.locked #dsel, body.locked #dnext, body.locked #share, b
 #sharebox .hint{color:var(--muted);font-size:13px;margin:0}
 .s-end .endvids{position:absolute;left:110px;top:700px;display:flex;gap:12px;flex-wrap:wrap;z-index:3}
 a.vbtn{text-decoration:none}
+.s-cover .goal{position:absolute;left:112px;top:810px;display:flex;gap:18px;align-items:center;font:400 52px/1 var(--f-display);color:var(--ink)}
+.s-cover .goal i{font-style:normal;font:700 28px/1 var(--f-body);background:var(--olive);color:#fff;border-radius:999px;padding:12px 22px}
+.s-cover .acts{bottom:60px}
+.s-talk .kicker{position:absolute;left:110px;top:150px;display:flex;gap:14px}
+.s-talk h2{position:absolute;left:104px;top:230px;margin:0;font:400 150px/1 var(--f-display)}
+.s-talk .promise{position:absolute;left:110px;top:430px;width:1100px;margin:0;padding:0;display:flex;flex-direction:column;gap:18px}
+.s-talk .promise li{list-style:none;display:grid;grid-template-columns:70px 1fr;gap:24px;align-items:center;background:var(--paper);border-radius:24px;padding:22px 32px;font:400 58px/1.15 var(--f-display);box-shadow:0 8px 0 rgba(90,70,50,.08)}
+.s-talk .promise b{width:70px;height:70px;border-radius:50%;background:var(--olive);color:#fff;display:grid;place-items:center;font:400 38px/1 var(--f-display)}
+.s-talk .tipbox{position:absolute;left:110px;bottom:60px;display:flex;flex-direction:column;gap:6px;font:700 28px/1.35 var(--f-body);color:var(--muted)}
+.s-talk .tipbox i{font-style:normal;color:var(--olive);font-size:24px;letter-spacing:.08em}
+.s-talk .homework{position:absolute;left:110px;bottom:70px;background:var(--blue);color:#fff;border-radius:24px;padding:24px 34px;display:flex;flex-direction:column;gap:10px;font:400 48px/1.2 var(--f-display);max-width:1100px}
+.s-talk .homework i{font-style:normal;font:700 26px/1 var(--f-body);color:#dfe6ff}
+.how.steps li{grid-template-columns:54px 330px 1fr;align-items:center}
+.how.steps .st{font:400 44px/1.1 var(--f-display)}
+.how.steps .crit{color:var(--olive)}
+.acts2 .pairnote{font:700 26px/1.3 var(--f-body);color:var(--muted);max-width:560px}
+.flow.dense{top:250px}
+.flow.dense li{grid-template-columns:58px 1fr;gap:20px}
+.flow.dense .no{width:58px;height:58px;font-size:30px}
+.flow.dense .tx{font-size:42px;padding:9px 0}
+.flow.dense .tx small{font-size:24px}
+.flow.dense li + li::before{left:27px;top:-10px;height:20px}
 </style>
 
 <div id="viewport"><div id="stage"></div></div>
@@ -387,6 +409,20 @@ const ACT = {
   "앞차기":{sub:"태권도의 가장 기본 발차기", photo:"m_break", how:["무릎을 가슴까지 높이 들어요","발끝을 세우고 앞으로 쭉!","찬 발은 빠르게 접어서 내려요"]},
   "이달의 품새":{sub:"", photo:"m_poomsae", how:[]}
 };
+/* ===== 날짜별 추가 자료 (D 드라이브 자료에서 가져옴) ===== */
+const DAYPLUS = {
+  15: {
+    src: "2024-10-15 수업일지 · 품태권도 기술발차기 단계표(2024)",
+    goal: "경청의 마음 심기",
+    tips: ["수업 난이도는 낮게, 즐겁게! 멘토제 적극 활용", "칭찬은 디테일하게!", "안전과 질서가 무너지지 않도록"],
+    start: ["사범님이 말할 때는 동작을 멈춰요", "말하는 사람의 눈을 바라봐요", "끝까지 듣고 \"네!\" 하고 대답해요"],
+    end: ["오늘 친구 말, 사범님 말을 끝까지 들었나요?", "잘 듣는 사람이 더 빨리 배우고, 친구도 많아져요"],
+    homework: "집에서 부모님 말씀을 끝까지 듣고 \"네!\" 하고 대답하기",
+    times: {"시작 멘트":"3분","준비운동":"15분","본운동":"25분","마무리":"5분","종료 멘트":"3분"},
+    kick: { steps: [["도약","5스텝 (왼·오·왼·오·왼)"],["뛰어앞차기","머리 한 뼘 위"],["뛰어돌려차기","허리 쓰임"],["뛰어옆차기","밑발 당기기 · 골반 넣어 차기"]],
+            pair: "짝과 함께: 한 명은 차고, 한 명은 높이를 봐 주고 끝까지 말해 주기", table: "assets/kick_table.webp" }
+  }
+};
 const TRACKS = [
   {src:"assets/bgm1.mp3", name:"Fast and Run · Nico Staf"},
   {src:"assets/bgm2.mp3", name:"Meet & Fun! · Ofshane"},
@@ -468,19 +504,27 @@ function buildDeck(d){
       <img class="art ${/^h_/.test(e.img)?"card":""}" src="assets/${e.img}.webp" alt="${esc(title.replace(/\n/g," "))}"></div>`}, noticeSlide(d)];
   }
   const items=itemsFor(d);
-  const S=[];
+  const S=[]; const DP=DAYPLUS[d]||null; const TM=(DP&&DP.times)||{};
   S.push({sid:"cover", label:"오늘은", music:"bgm", cls:"s-cover", html:`<div class="blob b1"></div><div class="dots"></div><div class="olivebar"></div>
     <div class="hello">오늘은</div>
     <div class="bigd"><small>${M}월</small> ${d}일</div><div class="dw">${DOW_LONG[dow]}</div>
     <div class="q">${E("cover.q",textFor(d,"cover.q","오늘의 수업은??"))}</div>
+    ${DP&&DP.goal?`<div class="goal"><i>오늘의 목표</i>${E("cover.goal",textFor(d,"cover.goal",DP.goal))}</div>`:""}
     <div class="acts"><button class="btn dark" data-cue="start">▶ 수련 시작 음성</button></div>
     <img class="photo" src="assets/m_pair_red.webp" alt="도복을 입은 품태권도 모델 수련생 두 명">`});
-  const flow=[["음악 명상",""],["이달의 인성",PLAN.virtue.word],["준비운동","스트레칭"],
-    ...items.map(it=>[it.n, it.g==="품새"?`${itemField(it,"lo")} · ${itemField(it,"hi")}`:GROUPS[it.g]||it.g, true]),["마무리 인사",""],["전달사항",""]];
+  const flow=[...(DP&&DP.start?[["시작 멘트",TM["시작 멘트"]||""]]:[]),["음악 명상",""],["이달의 인성",PLAN.virtue.word],["준비운동",TM["준비운동"]||"스트레칭"],
+    ...items.map((it,k)=>[it.n, (it.g==="품새"?`${itemField(it,"lo")} · ${itemField(it,"hi")}`:GROUPS[it.g]||it.g)+(k===0&&TM["본운동"]?` · 본운동 ${TM["본운동"]}`:""), true]),
+    ...(DP&&DP.end?[["종료 멘트",TM["종료 멘트"]||""]]:[]),["마무리 인사",TM["마무리"]||""],["전달사항",""]];
   S.push({sid:"flow", label:"오늘의 수업", music:"bgm", cls:"s-flow", html:`${deco}${brand}
     <div class="title">오늘의 <span>수업 순서</span></div>
-    <ol class="flow">${flow.map((f,i)=>`<li class="${f[2]?"main":""}" style="animation-delay:${i*.06}s"><span class="no">${i+1}</span><span class="tx">${esc(f[0])}${f[1]?`<small>${esc(f[1])}</small>`:""}</span></li>`).join("")}</ol>
+    <ol class="flow ${flow.length>9?"dense":""}">${flow.map((f,i)=>`<li class="${f[2]?"main":""}" style="animation-delay:${i*.06}s"><span class="no">${i+1}</span><span class="tx">${esc(f[0])}${f[1]?`<small>${esc(f[1])}</small>`:""}</span></li>`).join("")}</ol>
     <img class="photo" src="assets/m_group.webp" alt="품태권도 모델 수련생들">`});
+  if(DP&&DP.start) S.push({sid:"talk1", label:"시작 멘트", music:"bgm", cls:"s-talk", html:`${deco}${brand}
+    <div class="kicker"><span class="chip">시작 멘트</span>${TM["시작 멘트"]?`<span class="chip olive">${esc(TM["시작 멘트"])}</span>`:""}</div>
+    <h2>오늘의 약속</h2>
+    <ol class="promise">${DP.start.map((t,j)=>`<li><b>${j+1}</b>${E("talk1.l"+j,textFor(d,"talk1.l"+j,t))}</li>`).join("")}</ol>
+    ${DP.tips?`<div class="tipbox"><i>지도 포인트</i>${DP.tips.map((t,j)=>`<span>· ${E("talk1.t"+j,textFor(d,"talk1.t"+j,t))}</span>`).join("")}</div>`:""}
+    <img class="photo" src="assets/m_sit_listen.webp" alt="바르게 앉아 듣는 모델 수련생들">`});
   S.push({sid:"med", label:"음악 명상", music:"med", cls:"s-med", html:`<div class="ring"></div><div class="ring r2"></div>${brand}
     <div class="center"><div class="eyebrow">MEDITATION</div><h2>음악명상</h2>
     ${E("med.p",textFor(d,"med.p","허리를 펴고 바르게 앉아요\n눈을 감고, 천천히 숨을 들이쉬고 내쉬어요"),"p","","")}</div>`});
@@ -508,6 +552,16 @@ function buildDeck(d){
         <img class="photo" src="assets/${photo}.webp" alt="품새 준비 자세의 모델 수련생">`});
       return;
     }
+    if(it.n==="기술발차기" && DP && DP.kick){
+      const K=DP.kick;
+      S.push({sid:"i"+idx, label:it.n, music:"bgm", cls:"s-act", html:`${deco}<div class="halo"></div>${brand}
+        <div class="kicker"><span class="chip">기술발차기</span><span class="chip olive">도약 1~${K.steps.length}단계</span></div>
+        <h2>${E(`item:${idx}:n`,it.n)}</h2><div class="sub">품태권도 기술발차기 단계표</div>
+        <ul class="how steps">${K.steps.map((st,j)=>`<li><b>${j+1}</b><span class="st">${E(`kick.n${j}`,textFor(d,"kick.n"+j,st[0]))}</span><span class="crit">${E(`kick.c${j}`,textFor(d,"kick.c"+j,st[1]))}</span></li>`).join("")}</ul>
+        <div class="acts2">${K.table?`<button class="btn" data-img="${K.table}" data-imgt="기술발차기 단계표">▶ 단계표 전체 보기</button>`:""}<span class="pairnote">${E("kick.pair",textFor(d,"kick.pair",K.pair||""))}</span></div>
+        <img class="photo" src="assets/m_kick_red.webp" alt="발차기 동작의 모델 수련생">`});
+      return;
+    }
     const cue=a.cue?CUES[a.cue]:null;
     const how=[0,1,2,3].map(j=>{const t=itemField(it,"how",j);return `<li class="${t?"":"empty"}"><b>${j+1}</b>${E(`item:${idx}:how:${j}`,t)}</li>`}).join("");
     S.push({sid:"i"+idx, label:it.n, music:"bgm", cls:"s-act", html:`${deco}<div class="halo"></div>${brand}
@@ -520,6 +574,12 @@ function buildDeck(d){
   const nd=dayList.find(x=>x>d && !isSpecial(x));
   const nextTxt = nd ? `${M}월 ${nd}일(${DOW_KO[dateOf(nd).getDay()]}) · ${itemsFor(nd).map(i=>i.n).join(" · ")}` : "다음 달 수련계획을 기대해 주세요!";
   const evt = e.event ? `<div class="next" style="background:var(--blue);color:#fff"><i style="color:#dfe6ff">오늘의 일정</i>${E("end.evt",textFor(d,"end.evt",e.event+" 출발! 선생님 말씀 잘 듣고 안전하게"))}</div>` : "";
+  if(DP&&DP.end) S.push({sid:"talk2", label:"종료 멘트", music:"med", cls:"s-talk end2", html:`${deco}${brand}
+    <div class="kicker"><span class="chip">종료 멘트</span>${TM["종료 멘트"]?`<span class="chip olive">${esc(TM["종료 멘트"])}</span>`:""}</div>
+    <h2>오늘 잘 들었나요?</h2>
+    <ol class="promise">${DP.end.map((t,j)=>`<li><b>${j+1}</b>${E("talk2.l"+j,textFor(d,"talk2.l"+j,t))}</li>`).join("")}</ol>
+    ${DP.homework?`<div class="homework"><i>오늘의 숙제</i>${E("talk2.hw",textFor(d,"talk2.hw",DP.homework))}</div>`:""}
+    <img class="photo" src="assets/m_heart.webp" alt="하트를 만든 모델 수련생">`});
   S.push({sid:"end", label:"마무리 인사", music:"bgm", cls:"s-end", html:`<div class="blob b1" style="background:#c7b5a3"></div><div class="dots"></div>
     <div class="msg">${E("end.msg",textFor(d,"end.msg","오늘도 최선을 다한\n품태권도 친구들!"),"span","","")}</div>
     <div class="shout">품! <span>파이팅!</span></div>
@@ -602,6 +662,7 @@ document.getElementById("dprev").onclick=()=>{const k=dayList.indexOf(curDay); o
 document.getElementById("dnext").onclick=()=>{const k=dayList.indexOf(curDay); openDay(curDay==="month"||k===dayList.length-1?"month":dayList[k+1]);};
 stage.addEventListener("click",ev=>{
   const yl=ev.target.closest("[data-ytlink]"); if(yl){ stopCue(false); bgm.pause(); trackEl.textContent="▶ 유튜브 새 창에서 재생 중 · 돌아오면 ♪ 음악을 눌러 주세요"; return; }
+  const im=ev.target.closest("[data-img]"); if(im){ openImage(im.dataset.img, im.dataset.imgt||""); return; }
   const v=ev.target.closest("[data-video]"); if(v){ openVideo(v.dataset.video); return; }
   const c=ev.target.closest("[data-cue]"); if(c){ toggleCue(c.dataset.cue,c); return; }
   const g=ev.target.closest("[data-day]"); if(g) openDay(+g.dataset.day);
@@ -681,6 +742,13 @@ function openVideo(key){
   const load=()=>{ el.src=`video/v_${key}_${String(p).padStart(3,"0")}.mp4`; partEl.textContent=v.parts>1?`${p+1} / ${v.parts}`:""; el.play().catch(()=>{}); };
   el.addEventListener("ended",()=>{ if(p<v.parts-1){ p++; load(); } });
   load();
+}
+function openImage(src,title){
+  closeVideo(); vpOpen=true;
+  const slide=stage.querySelectorAll(".slide")[cur];
+  const box=document.createElement("div"); box.id="vp";
+  box.innerHTML=`<div class="vhead"><div><span class="vt">${esc(title)}</span></div><button class="vclose" data-vclose>✕ 닫기</button></div><img src="${esc(src)}" alt="${esc(title)}" style="max-height:860px;max-width:1520px;background:#fff;border-radius:12px">`;
+  slide.appendChild(box);
 }
 function closeVideo(){
   const box=document.getElementById("vp"); if(!box){ vpOpen=false; return; }
