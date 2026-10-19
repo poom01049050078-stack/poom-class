@@ -436,7 +436,8 @@ const VIDEOS = {
   av_thief:{label:"시청각프로그램 · 도둑잡기", short:"도둑잡기", yt:"fu3S8J3unmU"},
   av_dino:{label:"시청각프로그램 · 공룡", short:"공룡", yt:"WpT9dM2LaHE"},
   av_monkey:{label:"시청각프로그램 · 원숭이", short:"원숭이", yt:"dLQXgQSMZAw"},
-  tkd_aerobic:{label:"태권체조", short:"태권체조", yt:"OiG5gOUIUVA"}
+  tkd_aerobic:{label:"태권체조", short:"태권체조", yt:"OiG5gOUIUVA"},
+  breaking:{label:"격파 연습 · 재미타·손날·메주먹·위력격파", short:"격파 연습", yt:"WiRMIQ4j9Ho"}
 };
 /* 유튜브를 화면 안에서 재생할 수 있는 곳(우리 홈페이지)인지: 아티팩트 안에서는 새 창으로 엽니다 */
 const EMBED = /github\.io$/.test(location.hostname) || /[?&]embed=1/.test(location.search);
@@ -451,6 +452,7 @@ const DEFAULT_VIDEOS = {
   "바른체형교정":["stretchboard"],
   "폼롤러스트레칭":["foamroller"],
   "태권체조":["tkd_aerobic"],
+  "격파":["breaking"], "손날격파":["breaking"], "위력격파":["breaking"], "메주먹격파":["breaking"],
   "마무리 인사":["belt","dobok"]
 };
 const GROUPS = {"PAPS":"PAPS 체력측정","커리큘럼":"커리큘럼교육","품새":"이달의 품새","줄넘기":"줄넘기","기술발차기":"기술발차기","매트운동":"매트운동","제미타프로그램":"재미타 프로그램","준비운동":"준비운동","유아체육":"유아체육","음악프로그램":"음악프로그램","발표력":"발표력","레크레이션":"레크레이션","기타":"오늘의 수련"};
