@@ -187,6 +187,9 @@ body{margin:0;background:#3a332c;color:var(--ink);font-family:var(--f-body);over
 .s-notice .nh h2{margin:0;font:400 120px/1 var(--f-display)}
 .s-notice .nh span{font:700 40px/1 var(--f-body);color:var(--muted)}
 .s-notice .poster{position:absolute;right:110px;top:200px;height:820px;aspect-ratio:1055/1491;padding:0;border:0;border-radius:24px;overflow:hidden;cursor:zoom-in;box-shadow:0 18px 40px rgba(0,0,0,.18);background:#fff}
+.s-notice .plink{position:absolute;right:110px;top:950px;width:509px;box-sizing:border-box;text-align:center;font:700 30px/1 var(--f-body);background:var(--ink);color:#fff;border-radius:999px;padding:20px 0;text-decoration:none}
+.s-notice .plink:focus-visible{outline:4px solid var(--gold);outline-offset:4px}
+.s-notice .poster:has(+.plink){height:720px}
 .s-notice .poster img{width:100%;height:100%;object-fit:cover;display:block}
 .s-notice .poster span{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);font:700 24px/1 var(--f-body);background:rgba(42,36,31,.82);color:#fff;border-radius:999px;padding:12px 20px;white-space:nowrap}
 .s-notice:has(.poster) .pin{right:810px}
@@ -576,13 +579,13 @@ function vidButtons(list, extra){
 }
 
 /* 날짜별 전달사항 포스터 (초등부·유치부 공통) */
-const NOTICE_POSTER = { 19:{img:"assets/halloween_oneday.webp", t:"할로윈 원데이클래스 (10/31 토)"} };
+const NOTICE_POSTER = { 19:{img:"assets/halloween_oneday.webp", t:"할로윈 원데이클래스 (10/31 토)", link:"https://smartstore.naver.com/munguteacher/products/10414012384", linkT:"🚗 만들 고무동력자동차 보기"} };
 function noticeSlide(d){
   const dow=dateOf(d).getDay(), txt=(STORE[d]&&STORE[d].notice)||((DAYPLUS[d]&&DAYPLUS[d].notice)||"");
   return {sid:"notice", label:"전달사항", music:"bgm", cls:"s-notice", html:`${brand}
     <div class="nh"><h2>오늘의 전달사항</h2><span>${M}월 ${d}일 ${DOW_LONG[dow]}</span></div>
     <div class="pin"></div>
-    ${NOTICE_POSTER[d]?`<button class="poster" data-img="${NOTICE_POSTER[d].img}" data-imgt="${esc(NOTICE_POSTER[d].t)}" aria-label="포스터 크게 보기"><img src="${NOTICE_POSTER[d].img}" alt="${esc(NOTICE_POSTER[d].t)} 포스터"><span>눌러서 크게 보기</span></button>`:""}
+    ${NOTICE_POSTER[d]?`<button class="poster" data-img="${NOTICE_POSTER[d].img}" data-imgt="${esc(NOTICE_POSTER[d].t)}" aria-label="포스터 크게 보기"><img src="${NOTICE_POSTER[d].img}" alt="${esc(NOTICE_POSTER[d].t)} 포스터"><span>눌러서 크게 보기</span></button>${NOTICE_POSTER[d].link?`<a class="plink" href="${NOTICE_POSTER[d].link}" target="_blank" rel="noopener">${esc(NOTICE_POSTER[d].linkT||"자세히 보기")}</a>`:""}`:""}
     <div class="board${NOTICE_POSTER[d]?" withposter":""}"><div class="ntext" data-k="notice" data-ph="${canWrite?"✏ 수정을 누르고 여기에 전달사항을 적어 주세요":"오늘은 전달사항이 없어요"}">${esc(txt)}</div></div>`};
 }
 
