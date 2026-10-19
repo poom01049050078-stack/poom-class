@@ -426,7 +426,17 @@ const VIDEOS = {
   poom6_parts:{label:"태극 6장 · 나눠서 배우기", short:"6장 나눠 배우기", parts:2},
   warmup:{label:"몸풀기 체조", short:"몸풀기 체조", parts:1},
   belt:{label:"띠매기", short:"띠매기", yt:"tkAqcCBuwRA"},
-  dobok:{label:"도복정리", short:"도복정리", yt:"Hr7aZvMP15A"}
+  dobok:{label:"도복정리", short:"도복정리", yt:"Hr7aZvMP15A"},
+  stretchboard:{label:"스트레칭보드 운동 (바른체형)", short:"스트레칭보드", yt:"j9GylvymvK0"},
+  foamroller:{label:"폼롤러 스트레칭 운동", short:"폼롤러", yt:"slKZhfF3sVM"},
+  warm_shark:{label:"아기상어 몸풀기운동", short:"아기상어", yt:"cjFus96_p0E"},
+  warm_gym:{label:"짐앤펀 준비운동", short:"짐앤펀", yt:"z5i06DeOw5o"},
+  warm_basic:{label:"준비운동 (스트레칭)", short:"스트레칭", yt:"261zRi61pko"},
+  av_run:{label:"시청각프로그램 · 달리기", short:"달리기", yt:"JKcurx52F4o"},
+  av_thief:{label:"시청각프로그램 · 도둑잡기", short:"도둑잡기", yt:"fu3S8J3unmU"},
+  av_dino:{label:"시청각프로그램 · 공룡", short:"공룡", yt:"WpT9dM2LaHE"},
+  av_monkey:{label:"시청각프로그램 · 원숭이", short:"원숭이", yt:"dLQXgQSMZAw"},
+  tkd_aerobic:{label:"태권체조", short:"태권체조", yt:"OiG5gOUIUVA"}
 };
 /* 유튜브를 화면 안에서 재생할 수 있는 곳(우리 홈페이지)인지: 아티팩트 안에서는 새 창으로 엽니다 */
 const EMBED = /github\.io$/.test(location.hostname) || /[?&]embed=1/.test(location.search);
@@ -436,7 +446,11 @@ const DEFAULT_VIDEOS = {
   "기본발차기":["kick_front","kick_round","kick_side","kick_back","kick_hook"],
   "앞차기":["kick_front"],
   "이달의 품새":["poom4","poom6","poom4_parts","poom6_parts"],
-  "준비운동":["warmup"],
+  "준비운동":["warmup","warm_basic","warm_gym","warm_shark"],
+  "시청각준비운동":["av_run","av_thief","av_dino","av_monkey","warm_shark","warm_gym","warm_basic"],
+  "바른체형교정":["stretchboard"],
+  "폼롤러스트레칭":["foamroller"],
+  "태권체조":["tkd_aerobic"],
   "마무리 인사":["belt","dobok"]
 };
 const GROUPS = {"PAPS":"PAPS 체력측정","커리큘럼":"커리큘럼교육","품새":"이달의 품새","줄넘기":"줄넘기","기술발차기":"기술발차기","매트운동":"매트운동","제미타프로그램":"재미타 프로그램","준비운동":"준비운동","유아체육":"유아체육","음악프로그램":"음악프로그램","발표력":"발표력","레크레이션":"레크레이션","기타":"오늘의 수련"};
