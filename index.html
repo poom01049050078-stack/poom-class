@@ -317,7 +317,7 @@ a.vbtn{text-decoration:none}
 <div id="start">
   <div class="card">
     <h1 id="startTitle">오늘의 수업을<br>시작할까요?</h1>
-    <p>오늘 날짜의 수업 PPT가 열리고, 장마다 맞는 음악이 나옵니다.<br>← → 키로 넘기고, F는 전체화면, M은 음악입니다.</p>
+    <p>오늘 날짜의 수업 PPT가 열리고, 장마다 맞는 음악이 나옵니다.<br>→ 키(또는 프레젠터 리모컨)로 넘기면 영상이 있는 장에서는 영상이 먼저 나옵니다.<br>숫자 1·2·3은 그 장의 영상, F는 전체화면, M은 음악입니다.</p>
     <div class="row">
       <button class="btn" id="go">♪ 음악과 함께 시작</button>
       <button class="btn ghost" id="quiet">음악 없이 보기</button>
@@ -729,14 +729,24 @@ function show(i, quiet){
   const els=stage.querySelectorAll(".slide");
   i=Math.max(0,Math.min(deck.length-1,i));
   if(cur>=0&&els[cur]) els[cur].classList.remove("on");
+  if(i!==cur) played.clear();
   cur=i; els[cur].classList.add("on");
   els.forEach((el,j)=>el.setAttribute("aria-hidden",j===cur?"false":"true"));
   document.getElementById("pos").textContent=`${cur+1}/${deck.length} · ${deck[cur].label}`;
   if(!quiet){ closeVideo(); stopCue(false); }
   syncMusic();
 }
-function stepNext(){ if(cur<deck.length-1) show(cur+1); else if(!LOCK){ const k=dayList.indexOf(curDay); if(k>=0&&k<dayList.length-1) openDay(dayList[k+1]); } }
-function stepPrev(){ if(cur>0) show(cur-1); else if(!LOCK){ const k=dayList.indexOf(curDay); if(k>0) openDay(dayList[k-1], 99); } }
+/* 한 버튼 진행: 영상이 열려 있으면 닫고, 종목 장에서는 첫 영상을 먼저 틀고, 그다음 누르면 다음 장 */
+const played=new Set();
+function slideVideos(){ const el=stage.querySelectorAll(".slide")[cur]; return el&&el.classList.contains("s-act") ? [...el.querySelectorAll("[data-video]")] : []; }
+function playNth(n){ const b=slideVideos()[n]; if(!b) return false; played.add(n); openVideo(b.dataset.video); return true; }
+function stepNext(){
+  if(vpOpen){ closeVideo(); return; }
+  if(!editing && played.size===0 && playNth(0)) return;   // 첫 영상만 자동, 나머지는 숫자키
+  stepNextSlide();
+}
+function stepNextSlide(){ if(cur<deck.length-1) show(cur+1); else if(!LOCK){ const k=dayList.indexOf(curDay); if(k>=0&&k<dayList.length-1) openDay(dayList[k+1]); } }
+function stepPrev(){ if(vpOpen){ closeVideo(); return; } if(cur>0) show(cur-1); else if(!LOCK){ const k=dayList.indexOf(curDay); if(k>0) openDay(dayList[k-1], 99); } }
 function todayDay(){
   const now=new Date();
   if(now.getFullYear()!==PLAN.year||now.getMonth()+1!==PLAN.month) return dayList[0];
@@ -773,6 +783,9 @@ addEventListener("keydown",ev=>{
   if(["ArrowRight","PageDown"," "].includes(ev.key)){ev.preventDefault();stepNext();}
   else if(["ArrowLeft","PageUp"].includes(ev.key)){ev.preventDefault();stepPrev();}
   else if(ev.key==="Home") show(0);
+  else if(ev.key==="F5"){ ev.preventDefault(); toggleFs(); }
+  else if(["b","B",".",","].includes(ev.key)){ ev.preventDefault(); if(vpOpen) closeVideo(); else playNth(Math.max(0,slideVideos().findIndex((b,j)=>!played.has(j)))); }
+  else if(/^[1-9]$/.test(ev.key) && !editing){ if(vpOpen) closeVideo(); playNth(+ev.key-1); }
   else if(ev.key==="f"||ev.key==="F") toggleFs();
   else if(ev.key==="m"||ev.key==="M") toggleMusic();
 });
@@ -832,7 +845,7 @@ function openVideo(key){
   const slide=stage.querySelectorAll(".slide")[cur];
   const box=document.createElement("div"); box.id="vp";
   box.innerHTML=`<div class="vhead"><div><span class="vt">${esc(v.label)}</span><span class="vpart"></span></div><button class="vclose" data-vclose>✕ 닫기</button></div>`+
-    (yt ? `<iframe width="1520" height="855" style="border:0;border-radius:18px;background:#000" src="https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&rel=0&playsinline=1" title="${esc(v.label)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`
+    (yt ? `<iframe width="1520" height="855" style="border:0;border-radius:18px;background:#000" src="https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&rel=0&playsinline=1&enablejsapi=1" title="${esc(v.label)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`
         : `<video controls playsinline></video>`);
   slide.appendChild(box);
   trackEl.textContent="▶ 영상 · "+v.label;
@@ -840,9 +853,14 @@ function openVideo(key){
   const el=box.querySelector("video"), partEl=box.querySelector(".vpart");
   let p=0;
   const load=()=>{ el.src=`video/v_${key}_${String(p).padStart(3,"0")}.mp4`; partEl.textContent=v.parts>1?`${p+1} / ${v.parts}`:""; el.play().catch(()=>{}); };
-  el.addEventListener("ended",()=>{ if(p<v.parts-1){ p++; load(); } });
+  el.addEventListener("ended",()=>{ if(p<v.parts-1){ p++; load(); } else closeVideo(); });
   load();
 }
+/* 유튜브가 끝나면 자동으로 닫기 + 리모컨 키가 계속 먹히도록 포커스 되찾기 */
+addEventListener("message",e=>{ if(!/youtube/.test(e.origin||"")) return; let j; try{ j=typeof e.data==="string"?JSON.parse(e.data):e.data; }catch(x){ return; }
+  if(j && j.info && j.info.playerState===0 && vpOpen) closeVideo(); });
+document.addEventListener("load",e=>{ const f=e.target; if(f && f.tagName==="IFRAME" && /youtube/.test(f.src)){ try{ f.contentWindow.postMessage(JSON.stringify({event:"listening",id:1,channel:"widget"}),"*"); }catch(x){} } },true);
+addEventListener("blur",()=>setTimeout(()=>{ const a=document.activeElement; if(a && a.tagName==="IFRAME"){ a.blur(); window.focus(); } },0));
 /* 왕중왕전 스톱워치 */
 let swT0=0, swAcc=0, swRun=null;
 function swShow(){ const ms=swAcc+(swRun?Date.now()-swT0:0), t=Math.floor(ms/1000); stage.querySelectorAll("[data-swt]").forEach(el=>el.textContent=`${String(Math.floor(t/60)).padStart(2,"0")}:${String(t%60).padStart(2,"0")}`); stage.querySelectorAll('[data-sw="go"]').forEach(b=>b.textContent=swRun?"■ 멈춤":(swAcc?"▶ 계속":"▶ 시작")); }
