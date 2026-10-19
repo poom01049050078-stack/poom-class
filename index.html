@@ -231,6 +231,7 @@ body{margin:0;background:#3a332c;color:var(--ink);font-family:var(--f-body);over
 .s-mot .shout2{position:absolute;left:110px;top:300px;display:flex;flex-direction:column;gap:40px;font:400 110px/1 var(--f-display)}
 .s-mot .shout2 em{font-style:normal;color:var(--gold)}
 .s-mot .mphoto{position:absolute;right:60px;bottom:0;height:820px}
+.s-mot .btn.vstory{position:absolute;left:1410px;top:850px;font-size:30px;padding:20px 30px}
 .s-mot .btn.mstory{position:absolute;left:110px;top:700px;font-size:40px;padding:28px 46px}
 #vp .script{width:1520px;max-height:860px;overflow:auto;background:var(--paper);color:var(--ink);border-radius:18px;padding:44px 60px;box-sizing:border-box;font:700 36px/1.7 var(--f-body);white-space:pre-line}
 .s-mot .cheer{position:absolute;left:110px;top:720px;font:400 80px/1 var(--f-display);background:var(--gold);color:var(--ink);border-radius:28px;padding:28px 44px}
@@ -657,7 +658,7 @@ function motivSlides(d){
     {sid:"m3", label:"젠슨 황 영상", music:"bgm", cls:"s-mot autovid", html:`${brand}<div class="mk">${T("k3","엔비디아 젠슨 황 대표님의 이야기")}</div>
       <button class="vwrap" data-video="jensen" aria-label="젠슨 황 영상 재생"><img src="assets/jensen_poster.webp" alt=""><span>▶ 영상 보기</span></button>
       <div class="vside">${T("v3","처음부터\n잘된 게 아니래요.\n\n실패해도\n다시 도전했어요!")}</div>
-      <div class="vcap">영상 2분 46초 · tvN 「유 퀴즈 온 더 블럭」 중 · 도장 수업용</div>
+      <div class="vcap">영상 2분 46초 · tvN 「유 퀴즈 온 더 블럭」 중 · 도장 수업용</div>${MOTIV_SCRIPT[d]?`<button class="btn vstory" data-script="${d}">📖 관장님 이야기</button>`:""}
       ${say("n3","영상 뒤: 젠슨 황 대표님도 처음부터 잘된 게 아니래요. 실패해도 다시 도전했기 때문에 지금이 있는 거예요.")}`},
     ...(MOTIV_SCRIPT[d]?[{sid:"mstory", label:"관장님 이야기", music:"med", cls:"s-mot", html:`${brand}<div class="mk">${T("ks","관장님 이야기")}</div>
       <div class="mbig" style="font-size:112px">${T("ts","AI 시대에\n더욱 소중한 인성,")}</div><div class="msub" style="top:520px">${T("ss","태권도의 인내와 극기로 기릅니다")}</div>
