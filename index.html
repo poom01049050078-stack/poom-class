@@ -881,7 +881,9 @@ stage.addEventListener("click",ev=>{
   const yl=ev.target.closest("[data-ytlink]"); if(yl){ stopCue(false); bgm.pause(); trackEl.textContent="▶ 유튜브 새 창에서 재생 중 · 돌아오면 ♪ 음악을 눌러 주세요"; return; }
   const sw=ev.target.closest("[data-sw]"); if(sw){ swClick(sw); return; }
   const im=ev.target.closest("[data-img]"); if(im){ openImage(im.dataset.img, im.dataset.imgt||""); return; }
-  const sc=ev.target.closest("[data-script]"); if(sc){ const k=+sc.dataset.script; openText("관장님 이야기", textFor(k,"mot.script",MOTIV_SCRIPT[k]||"")); return; }
+  const sc=ev.target.closest("[data-script]"); if(sc){ const k=+sc.dataset.script; let t=textFor(k,"mot.script",MOTIV_SCRIPT[k]||"");
+    if(LOCK==="motiv") t=t.replace("이번 주에는 체력 기록측정이 있어요. 기록이 생각만큼 안 나와도 괜찮아요.","이번 주에도 새로운 동작에 도전해 봐요. 처음에는 잘 안 돼도 괜찮아요.");   // 가맹점 공유 링크용 문장
+    openText("관장님 이야기", t); return; }
   const v=ev.target.closest("[data-video]"); if(v){ openVideo(v.dataset.video); return; }
   const c=ev.target.closest("[data-cue]"); if(c){ toggleCue(c.dataset.cue,c); return; }
   const g=ev.target.closest("[data-day]"); if(g) openDay(+g.dataset.day);
