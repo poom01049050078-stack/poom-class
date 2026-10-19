@@ -201,6 +201,37 @@ body{margin:0;background:#3a332c;color:var(--ink);font-family:var(--f-body);over
 .s-notice .ntext:empty::before{content:attr(data-ph);color:var(--muted);font-weight:500}
 .s-notice .pin{position:absolute;right:150px;top:226px;width:70px;height:70px;border-radius:50%;background:var(--red);box-shadow:0 8px 0 rgba(0,0,0,.15)}
 
+
+/* 마음 수련(동기부여) 장 */
+.s-mot{background:var(--paper)}
+.s-mot.dark{background:var(--ink);color:#f3efe6}
+.s-mot .mk{position:absolute;left:110px;top:150px;font:700 34px/1 var(--f-body);color:var(--olive);letter-spacing:.06em}
+.s-mot.dark .mk{color:#cbbfb1}
+.s-mot .mbig{position:absolute;left:104px;top:230px;width:1700px;margin:0;font:400 140px/1.12 var(--f-display);white-space:pre-line}
+.s-mot .mbig em{font-style:normal;color:var(--red)}
+.s-mot.dark .mbig em{color:var(--gold)}
+.s-mot .msub{position:absolute;left:110px;top:640px;font:400 64px/1.2 var(--f-display);color:var(--olive)}
+.s-mot.dark .msub{color:var(--gold)}
+.s-mot .say{position:absolute;left:110px;right:110px;bottom:56px;font:500 26px/1.45 var(--f-body);color:var(--muted);border-top:2px solid rgba(125,112,100,.25);padding-top:16px}
+.s-mot.dark .say{color:#a89a8b;border-color:rgba(255,255,255,.15)}
+.s-mot .say b{color:var(--olive);margin-right:10px}
+.s-mot .vwrap{position:absolute;left:110px;top:250px;width:1240px;height:698px;border-radius:28px;overflow:hidden;border:0;padding:0;cursor:pointer;background:#000;box-shadow:0 20px 40px rgba(0,0,0,.25)}
+.s-mot .vwrap img{width:100%;height:100%;object-fit:cover;display:block;opacity:.85}
+.s-mot .vwrap span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:700 44px/1 var(--f-body);background:var(--red);color:#fff;border-radius:999px;padding:28px 46px}
+.s-mot .vside{position:absolute;left:1410px;top:260px;width:400px;font:400 54px/1.25 var(--f-display);white-space:pre-line}
+.s-mot .vcap{position:absolute;left:1410px;top:760px;width:400px;font:500 24px/1.4 var(--f-body);color:var(--muted)}
+.s-mot .cards{position:absolute;left:110px;right:110px;top:400px;display:grid;gap:28px}
+.s-mot .cards div{background:#fff;border-radius:28px;padding:40px 36px;font:400 58px/1.2 var(--f-display);white-space:pre-line;box-shadow:0 10px 0 rgba(90,70,50,.08)}
+.s-mot .cards div:last-child{background:#f6e7d0}
+.s-mot .mline{position:absolute;left:110px;top:820px;font:400 64px/1 var(--f-display);color:var(--red)}
+.s-mot .word{position:absolute;left:100px;top:180px;font:400 300px/1 var(--f-display);color:var(--olive)}
+.s-mot .mean{position:absolute;left:110px;top:520px;font:400 84px/1.2 var(--f-display);white-space:pre-line}
+.s-mot .chip2{position:absolute;left:110px;top:780px;font:700 40px/1 var(--f-body);background:var(--olive);color:#fff;border-radius:999px;padding:22px 36px}
+.s-mot .safe{position:absolute;left:110px;top:870px;font:700 34px/1 var(--f-body);color:var(--red)}
+.s-mot .shout2{position:absolute;left:110px;top:300px;display:flex;flex-direction:column;gap:40px;font:400 110px/1 var(--f-display)}
+.s-mot .shout2 em{font-style:normal;color:var(--gold)}
+.s-mot .mphoto{position:absolute;right:60px;bottom:0;height:820px}
+.s-mot .cheer{position:absolute;left:110px;top:720px;font:400 80px/1 var(--f-display);background:var(--gold);color:var(--ink);border-radius:28px;padding:28px 44px}
 /* 수정 모드 */
 body.editing [data-k]{outline:4px dashed var(--gold);outline-offset:8px;border-radius:6px;cursor:text}
 body.editing [data-k]:focus{outline-style:solid;background:rgba(255,255,255,.55)}
@@ -437,7 +468,8 @@ const VIDEOS = {
   av_dino:{label:"시청각프로그램 · 공룡", short:"공룡", yt:"WpT9dM2LaHE"},
   av_monkey:{label:"시청각프로그램 · 원숭이", short:"원숭이", yt:"dLQXgQSMZAw"},
   tkd_aerobic:{label:"태권체조", short:"태권체조", yt:"OiG5gOUIUVA"},
-  breaking:{label:"격파 연습 · 재미타·손날·메주먹·위력격파", short:"격파 연습", yt:"WiRMIQ4j9Ho"}
+  breaking:{label:"격파 연습 · 재미타·손날·메주먹·위력격파", short:"격파 연습", yt:"WiRMIQ4j9Ho"},
+  jensen:{label:"젠슨 황 대표님 이야기 · 디글 「유 퀴즈 온 더 블럭」", short:"젠슨 황 영상", yt:"Fhor1hYfH-8"}
 };
 /* 유튜브를 화면 안에서 재생할 수 있는 곳(우리 홈페이지)인지: 아티팩트 안에서는 새 창으로 엽니다 */
 const EMBED = /github\.io$/.test(location.hostname) || /[?&]embed=1/.test(location.search);
@@ -605,6 +637,54 @@ function noticeSlide(d){
     <div class="board${NOTICE_POSTER[d]?" withposter":""}"><div class="ntext" data-k="notice" data-ph="${canWrite?"✏ 수정을 누르고 여기에 전달사항을 적어 주세요":"오늘은 전달사항이 없어요"}">${esc(txt)}</div></div>`};
 }
 
+
+/* 날짜별 마음 수련(동기부여) 장: 초등부·유치부 공통 */
+const MOTIV = { 26:true };
+function motivSlides(d){
+  const T=(k,def,tag="span",cls="")=>E("mot."+k,textFor(d,"mot."+k,def),tag,cls);
+  const say=(k,def)=>`<div class="say"><b>사범님 멘트</b>${T(k,def)}</div>`;
+  const pre=[
+    {sid:"m1", label:"오늘의 마음 수련", music:"bgm", cls:"s-mot dark", html:`${brand}<div class="mk">${T("k1","오늘의 마음 수련")}</div>
+      <div class="mbig">${T("t1","몸을 단련하며,\n마음의 힘을 기릅니다")}</div><div class="msub">${T("s1","인내 · 극기 · 도전")}</div>
+      ${say("n1","여러분, 오늘은 몸만이 아니라 마음도 수련하는 날이에요. 이번 주 우리가 키울 마음은 인내, 극기, 도전! 세 가지예요.")}`},
+    {sid:"m2", label:"생각해 봐요", music:"bgm", cls:"s-mot", html:`${brand}<div class="mk">${T("k2","영상을 보기 전에 생각해 봐요")}</div>
+      <div class="mbig">성공하려면<br><em>고생</em>해야 할까?</div><div class="msub">${T("s2","손을 들고 내 생각을 말해 봐요!")}</div>
+      ${say("n2","그렇다고 생각하는 친구 손! 아니라고 생각하는 친구 손! → 두세 명 이유를 짧게 듣고 영상으로 넘어가세요.")}`},
+    {sid:"m3", label:"젠슨 황 영상", music:"bgm", cls:"s-mot autovid", html:`${brand}<div class="mk">${T("k3","엔비디아 젠슨 황 대표님의 이야기")}</div>
+      <button class="vwrap" data-video="jensen" aria-label="젠슨 황 영상 재생"><img src="https://i.ytimg.com/vi/Fhor1hYfH-8/hqdefault.jpg" alt=""><span>▶ 영상 보기</span></button>
+      <div class="vside">${T("v3","처음부터\n잘된 게 아니래요.\n\n실패해도\n다시 도전했어요!")}</div>
+      <div class="vcap">영상: 디글 :Diggle 「유 퀴즈 온 더 블럭」 (tvN 공식 유튜브) · 인터넷 연결 필요</div>
+      ${say("n3","영상 뒤: 젠슨 황 대표님도 처음부터 잘된 게 아니래요. 실패해도 다시 도전했기 때문에 지금이 있는 거예요.")}`},
+    {sid:"m4", label:"어떤 사람이 될까", music:"bgm", cls:"s-mot", html:`${brand}<div class="mk">${T("k4","AI가 어려운 문제도 풀어 주는 시대")}</div>
+      <div class="mbig">그럼 우리는<br><em>어떤 사람</em>이<br>되어야 할까요?</div>
+      ${say("n4","앞으로는 AI가 많은 것을 알려 줄 거예요. 그럼 우리는 어떤 사람으로 자라야 할까요?")}`},
+    {sid:"m5", label:"이런 사람이 되어요", music:"bgm", cls:"s-mot", html:`${brand}<div class="mk">이런 사람이 되어요!</div>
+      <div class="cards" style="grid-template-columns:repeat(4,1fr)"><div>${T("p0","약속을\n지키는 사람")}</div><div>${T("p1","친구를\n배려하는 사람")}</div><div>${T("p2","어려운 일도\n끝까지\n해내는 사람")}</div><div>${T("p3","실패해도\n도전하는 사람")}</div></div>
+      ${say("n5","카드를 하나씩 가리키며 아이들과 함께 읽어 보세요.")}`},
+    {sid:"m6", label:"연습해야 생겨요", music:"bgm", cls:"s-mot", html:`${brand}<div class="mk">마음 수련</div>
+      <div class="mbig" style="font-size:110px">이런 마음은 <em>연습</em>해야 생겨요!</div>
+      <div class="cards" style="grid-template-columns:1fr 1fr;top:420px;right:110px"><div>${T("c1","발차기를 반복하면\n조금 힘들어요")}</div><div style="background:#fff">${T("c2","품새가 안 외워지면\n그만하고 싶어요")}</div></div>
+      <div class="mline">${T("l6","그때가 바로 마음이 자라는 순간!")}</div>
+      ${say("n6","이런 적 있는 친구? 하고 손을 들게 해 보세요.")}`},
+    ...[["인내","금방 잘되지 않아도\n꾸준히 해 보는 마음","품새가 안 외워져도 한 동작씩 반복!","금방 되지 않아도 꾸준히 하는 것, 그게 인내예요."],
+        ["극기","그만하고 싶은 마음을\n스스로 다스리는 힘","집중이 흐트러지면 자세를 바로잡아요!","장난치고 싶을 때 스스로 자세를 바로잡고 약속한 연습을 끝까지 해 보는 거예요."],
+        ["도전","실패해도 겁내지 않고\n다시 해 보는 용기","잘 안되는 동작도 다시 한번!","한 번 더 도전하는 친구가 진짜 멋진 태권도인이에요. 도전은 아이가 감당할 수 있는 수준으로 주세요."]]
+      .map((w,j)=>({sid:"mw"+j, label:w[0], music:"bgm", cls:"s-mot", html:`${brand}<div class="word">${w[0]}</div>
+        <div class="mean">${T("w"+j+".m",w[1])}</div><div class="chip2">${T("w"+j+".c",w[2])}</div>
+        ${j===2?`<div class="safe">${T("w2.s","아프거나 다친 곳이 있으면 바로 말하기! 그것도 용기예요")}</div>`:""}
+        <img class="mphoto" src="assets/${["m_poomsae","m_punch","m_kick_red"][j]}.webp" alt="">
+        ${say("w"+j+".n",w[3])}`})),
+    {sid:"m10", label:"다 함께 외쳐요", music:"bgm", cls:"s-mot dark", html:`${brand}<div class="mk">다 함께 외쳐요!</div>
+      <div class="shout2"><div>조금 힘들어도 <em>꾸준히!</em></div><div>그만하고 싶어도 <em>다시 한번!</em></div><div>실패해도 괜찮아 <em>도전!</em></div></div>
+      ${say("n10","사범님이 앞 구절을 외치면 아이들이 뒤 구절을 크게 따라 외쳐요. 이번 주 화~금요일에도 이 장으로 시작하면 좋아요.")}`}
+  ];
+  const post=[
+    {sid:"m11", label:"오늘 이겨 낸 마음", music:"bgm", cls:"s-mot", html:`${brand}<div class="mk">수업이 끝나면 생각해 봐요</div>
+      <div class="mbig">오늘 나는 어떤 마음을<br><em>이겨 냈나요?</em></div><div class="cheer">${T("c11","어려워도 해 볼 수 있어!")}</div>
+      ${say("n11","칭찬은 행동을 짚어서: \"넘어졌는데도 다시 해 봤구나. 그게 도전정신이야.\" 마지막에 다 함께 \"어려워도 해 볼 수 있어!\"")}`}
+  ];
+  return {pre,post};
+}
 function buildDeck(d){
   const e=PLAN.days[d], dow=dateOf(d).getDay();
   if(e.holiday||e.sat){
@@ -626,13 +706,15 @@ function buildDeck(d){
     ${DP&&DP.goal?`<div class="goal"><i>오늘의 목표</i>${E("cover.goal",textFor(d,"cover.goal",DP.goal))}</div>`:""}
     <div class="acts"><button class="btn dark" data-cue="start">▶ 수련 시작 음성</button>${vidButtons(DEFAULT_VIDEOS["마무리 인사"])}</div>
     <img class="photo" src="assets/${GROUP==="yu"?"m_group_yellow":"m_pair_red"}.webp" alt="도복을 입은 품태권도 모델 수련생들">`});
-  const flow=[...(DP&&DP.start?[["시작 멘트",TM["시작 멘트"]||""]]:[]),["음악 명상",""],["이달의 인성",PLAN.virtue.word],...(hasWarmItem?[]:[["준비운동",TM["준비운동"]||"스트레칭"]]),
+  const MV=MOTIV[d]?motivSlides(d):null;
+  const flow=[...(MV?[["마음 수련 · 인내 극기 도전","젠슨 황 영상 · 이야기"]]:[]),...(DP&&DP.start?[["시작 멘트",TM["시작 멘트"]||""]]:[]),["음악 명상",""],["이달의 인성",PLAN.virtue.word],...(hasWarmItem?[]:[["준비운동",TM["준비운동"]||"스트레칭"]]),
     ...items.map((it,k)=>[it.n, (it.g==="품새"?`${itemField(it,"lo")} · ${itemField(it,"hi")}`:GROUPS[it.g]||it.g)+(k===0&&TM["본운동"]?` · 본운동 ${TM["본운동"]}`:""), true]),
     ...(DP&&DP.end?[["종료 멘트",TM["종료 멘트"]||""]]:[]),["마무리 인사",TM["마무리"]||""],["전달사항",""]];
   S.push({sid:"flow", label:"오늘의 수업", music:"bgm", cls:"s-flow", html:`${deco}${brand}
     <div class="title">오늘의 <span>수업 순서</span></div>
     <ol class="flow ${flow.length>9?"dense":""}">${flow.map((f,i)=>`<li class="${f[2]?"main":""}" style="animation-delay:${i*.06}s"><span class="no">${i+1}</span><span class="tx">${esc(f[0])}${f[1]?`<small>${esc(f[1])}</small>`:""}</span></li>`).join("")}</ol>
     <img class="photo" src="assets/m_group.webp" alt="품태권도 모델 수련생들">`});
+  if(MV) S.push(...MV.pre);
   if(DP&&DP.start) S.push({sid:"talk1", label:"시작 멘트", music:"bgm", cls:"s-talk", html:`${deco}${brand}
     <div class="kicker"><span class="chip">시작 멘트</span>${TM["시작 멘트"]?`<span class="chip olive">${esc(TM["시작 멘트"])}</span>`:""}</div>
     <h2>오늘의 약속</h2>
@@ -695,6 +777,7 @@ function buildDeck(d){
     <ol class="promise">${DP.end.map((t,j)=>`<li><b>${j+1}</b>${E("talk2.l"+j,textFor(d,"talk2.l"+j,t))}</li>`).join("")}</ol>
     ${DP.homework?`<div class="homework"><i>오늘의 숙제</i>${E("talk2.hw",textFor(d,"talk2.hw",DP.homework))}</div>`:""}
     <img class="photo" src="assets/m_heart.webp" alt="하트를 만든 모델 수련생">`});
+  if(MV) S.push(...MV.post);
   S.push({sid:"end", label:"마무리 인사", music:"bgm", cls:"s-end", html:`<div class="blob b1" style="background:#c7b5a3"></div><div class="dots"></div>
     <div class="msg">${E("end.msg",textFor(d,"end.msg","오늘도 최선을 다한\n품태권도 친구들!"),"span","","")}</div>
     <div class="shout">품! <span>파이팅!</span></div>
@@ -754,7 +837,7 @@ function show(i, quiet){
 }
 /* 한 버튼 진행: 영상이 열려 있으면 닫고, 종목 장에서는 첫 영상을 먼저 틀고, 그다음 누르면 다음 장 */
 const played=new Set();
-function slideVideos(){ const el=stage.querySelectorAll(".slide")[cur]; return el&&el.classList.contains("s-act") ? [...el.querySelectorAll("[data-video]")] : []; }
+function slideVideos(){ const el=stage.querySelectorAll(".slide")[cur]; return el&&(el.classList.contains("s-act")||el.classList.contains("autovid")) ? [...el.querySelectorAll("[data-video]")] : []; }
 function playNth(n){ const b=slideVideos()[n]; if(!b) return false; played.add(n); openVideo(b.dataset.video); return true; }
 function stepNext(){
   if(vpOpen){ closeVideo(); return; }
