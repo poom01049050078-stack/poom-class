@@ -579,7 +579,7 @@ function vidButtons(list, extra){
 }
 
 /* 날짜별 전달사항 포스터 (초등부·유치부 공통) */
-const NOTICE_POSTER = { 19:{img:"assets/halloween_oneday.webp", t:"할로윈 원데이클래스 (10/31 토)", link:"https://smartstore.naver.com/munguteacher/products/10414012384", linkT:"🚗 만들 고무동력자동차 보기"} };
+const NOTICE_POSTER = { 19:{img:"assets/halloween_oneday.webp", t:"할로윈 원데이클래스 (10/31 토)"} };
 function noticeSlide(d){
   const dow=dateOf(d).getDay(), txt=(STORE[d]&&STORE[d].notice)||((DAYPLUS[d]&&DAYPLUS[d].notice)||"");
   return {sid:"notice", label:"전달사항", music:"bgm", cls:"s-notice", html:`${brand}
