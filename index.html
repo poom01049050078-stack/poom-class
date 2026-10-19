@@ -469,7 +469,7 @@ const VIDEOS = {
   av_monkey:{label:"시청각프로그램 · 원숭이", short:"원숭이", yt:"dLQXgQSMZAw"},
   tkd_aerobic:{label:"태권체조", short:"태권체조", yt:"OiG5gOUIUVA"},
   breaking:{label:"격파 연습 · 재미타·손날·메주먹·위력격파", short:"격파 연습", yt:"WiRMIQ4j9Ho"},
-  jensen:{label:"젠슨 황 대표님 이야기", short:"젠슨 황 영상", parts:1}
+  jensen:{label:"젠슨 황 대표님 이야기", short:"젠슨 황 영상", gd:"1TbZgdZVHXhv_bS7or1wYx-kF54FMYexq"}
 };
 /* 유튜브를 화면 안에서 재생할 수 있는 곳(우리 홈페이지)인지: 아티팩트 안에서는 새 창으로 엽니다 */
 const EMBED = /github\.io$/.test(location.hostname) || /[?&]embed=1/.test(location.search);
@@ -942,14 +942,16 @@ function openVideo(key){
   if(key.startsWith("yt:")){ const [,id,...t]=key.split(":"); yt=id; v={label:t.join(":")||"영상"}; }
   else { v=VIDEOS[key]; if(!v) return; yt=v.yt||null; }
   closeVideo(); stopCue(false); bgm.pause(); vpOpen=true;
+  const gd=v&&v.gd;
   const slide=stage.querySelectorAll(".slide")[cur];
   const box=document.createElement("div"); box.id="vp";
   box.innerHTML=`<div class="vhead"><div><span class="vt">${esc(v.label)}</span><span class="vpart"></span></div><button class="vclose" data-vclose>✕ 닫기</button></div>`+
-    (yt ? `<iframe width="1520" height="855" style="border:0;border-radius:18px;background:#000" src="https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&rel=0&playsinline=1&enablejsapi=1${v.start?`&start=${v.start}`:""}${v.end?`&end=${v.end}`:""}" title="${esc(v.label)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`
+    (gd ? `<iframe width="1520" height="855" style="border:0;border-radius:18px;background:#000" src="https://drive.google.com/file/d/${gd}/preview" title="${esc(v.label)}" allow="autoplay; fullscreen" allowfullscreen></iframe>`
+     : yt ? `<iframe width="1520" height="855" style="border:0;border-radius:18px;background:#000" src="https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&rel=0&playsinline=1&enablejsapi=1${v.start?`&start=${v.start}`:""}${v.end?`&end=${v.end}`:""}" title="${esc(v.label)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`
         : `<video controls playsinline></video>`);
   slide.appendChild(box);
   trackEl.textContent="▶ 영상 · "+v.label;
-  if(yt) return;
+  if(yt||gd) return;
   const el=box.querySelector("video"), partEl=box.querySelector(".vpart");
   let p=0;
   const load=()=>{ el.src=`video/v_${key}_${String(p).padStart(3,"0")}.mp4`; partEl.textContent=v.parts>1?`${p+1} / ${v.parts}`:""; el.play().catch(()=>{}); };
