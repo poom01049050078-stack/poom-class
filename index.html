@@ -231,6 +231,8 @@ body{margin:0;background:#3a332c;color:var(--ink);font-family:var(--f-body);over
 .s-mot .shout2{position:absolute;left:110px;top:300px;display:flex;flex-direction:column;gap:40px;font:400 110px/1 var(--f-display)}
 .s-mot .shout2 em{font-style:normal;color:var(--gold)}
 .s-mot .mphoto{position:absolute;right:60px;bottom:0;height:820px}
+.s-mot .btn.mstory{position:absolute;left:110px;top:700px;font-size:40px;padding:28px 46px}
+#vp .script{width:1520px;max-height:860px;overflow:auto;background:var(--paper);color:var(--ink);border-radius:18px;padding:44px 60px;box-sizing:border-box;font:700 36px/1.7 var(--f-body);white-space:pre-line}
 .s-mot .cheer{position:absolute;left:110px;top:720px;font:400 80px/1 var(--f-display);background:var(--gold);color:var(--ink);border-radius:28px;padding:28px 44px}
 /* 수정 모드 */
 body.editing [data-k]{outline:4px dashed var(--gold);outline-offset:8px;border-radius:6px;cursor:text}
@@ -640,6 +642,7 @@ function noticeSlide(d){
 
 /* 날짜별 마음 수련(동기부여) 장: 초등부·유치부 공통 */
 const MOTIV = { 26:true };
+const MOTIV_SCRIPT = { 26:"얘들아, 앞으로는 AI가 어려운 문제도 풀어 주고 많은 것을 알려 줄 거예요. 그렇다면 우리는 어떤 사람으로 자라야 할까요?\n\n아는 것이 많은 것과 함께, 약속을 지키고 친구를 배려하고 어려운 일도 책임 있게 해내는 사람이 되어야 해요.\n\n그런데 이런 마음은 생각만 한다고 생기지 않아요. 직접 연습해야 해요. 태권도에서 발차기를 반복하다 보면 조금 힘들고, 품새가 잘 안 외워지면 그만하고 싶을 때가 있지요.\n\n그때 조금 더 집중하고, 한 번 더 연습해 보는 거예요. 금방 되지 않아도 꾸준히 하는 것이 인내, 그만하고 싶은 마음을 스스로 다스리는 것이 극기예요.\n\n그리고 하나 더! 영상 속 젠슨 황 대표님도 다시 도전할 때마다 실패할 수도 있다는 걸 받아들여야 한다고 말했어요. 처음 해 보는 동작은 넘어지고 틀릴 수 있어요. 실패를 두려워하지 않고 다시 해 보는 마음, 그것이 도전정신이에요. 이번 주에는 체력 기록측정이 있어요. 기록이 생각만큼 안 나와도 괜찮아요. 지난번의 나보다 한 번 더 도전하는 친구가 진짜 멋진 태권도인이에요.\n\n그렇게 해낸 경험이 쌓이면 ‘어려워도 해 볼 수 있어’라는 마음이 생겨요. 그 힘은 공부할 때도, 약속을 지킬 때도, 친구와의 문제를 해결할 때도 도움이 될 거예요.\n\n우리 태권도는 몸과 함께 마음도 수련하는 곳이에요. 이번 한 주 동안 여러분이 이겨 낸 작은 어려움 하나하나가 마음을 자라게 할 거예요." };   // 관장님 이야기 전문
 const NO_MED = { 26:true };   // 명상 장을 빼는 날
 function motivSlides(d){
   const T=(k,def,tag="span",cls="")=>E("mot."+k,textFor(d,"mot."+k,def),tag,cls);
@@ -656,6 +659,11 @@ function motivSlides(d){
       <div class="vside">${T("v3","처음부터\n잘된 게 아니래요.\n\n실패해도\n다시 도전했어요!")}</div>
       <div class="vcap">영상 2분 46초 · tvN 「유 퀴즈 온 더 블럭」 중 · 도장 수업용</div>
       ${say("n3","영상 뒤: 젠슨 황 대표님도 처음부터 잘된 게 아니래요. 실패해도 다시 도전했기 때문에 지금이 있는 거예요.")}`},
+    ...(MOTIV_SCRIPT[d]?[{sid:"mstory", label:"관장님 이야기", music:"med", cls:"s-mot", html:`${brand}<div class="mk">${T("ks","관장님 이야기")}</div>
+      <div class="mbig" style="font-size:112px">${T("ts","AI 시대에\n더욱 소중한 인성,")}</div><div class="msub" style="top:520px">${T("ss","태권도의 인내와 극기로 기릅니다")}</div>
+      <button class="btn mstory" data-script="${d}">📖 관장님 이야기 전문 보기</button>
+      <img class="mphoto" src="assets/m_sit_listen.webp" alt="" style="height:600px">
+      ${say("ns","버튼을 눌러 관장님 이야기 전문을 아이들에게 읽어 주세요. (약 3분)")}`}]:[]),
     {sid:"m4", label:"어떤 사람이 될까", music:"bgm", cls:"s-mot", html:`${brand}<div class="mk">${T("k4","AI가 어려운 문제도 풀어 주는 시대")}</div>
       <div class="mbig">그럼 우리는<br><em>어떤 사람</em>이<br>되어야 할까요?</div>
       ${say("n4","앞으로는 AI가 많은 것을 알려 줄 거예요. 그럼 우리는 어떤 사람으로 자라야 할까요?")}`},
@@ -872,6 +880,7 @@ stage.addEventListener("click",ev=>{
   const yl=ev.target.closest("[data-ytlink]"); if(yl){ stopCue(false); bgm.pause(); trackEl.textContent="▶ 유튜브 새 창에서 재생 중 · 돌아오면 ♪ 음악을 눌러 주세요"; return; }
   const sw=ev.target.closest("[data-sw]"); if(sw){ swClick(sw); return; }
   const im=ev.target.closest("[data-img]"); if(im){ openImage(im.dataset.img, im.dataset.imgt||""); return; }
+  const sc=ev.target.closest("[data-script]"); if(sc){ const k=+sc.dataset.script; openText("관장님 이야기", textFor(k,"mot.script",MOTIV_SCRIPT[k]||"")); return; }
   const v=ev.target.closest("[data-video]"); if(v){ openVideo(v.dataset.video); return; }
   const c=ev.target.closest("[data-cue]"); if(c){ toggleCue(c.dataset.cue,c); return; }
   const g=ev.target.closest("[data-day]"); if(g) openDay(+g.dataset.day);
@@ -973,6 +982,13 @@ function swClick(b){
     else { swT0=Date.now(); swRun=setInterval(swShow,250); go.textContent="■ 멈춤"; if(!musicOn){ musicOn=true; playBtn.classList.add("on"); } syncMusic(); }
   } else { clearInterval(swRun); swRun=null; swAcc=0; if(go) go.textContent="▶ 시작"; }
   swShow();
+}
+function openText(title,text){
+  closeVideo(); vpOpen=true;
+  const slide=stage.querySelectorAll(".slide")[cur];
+  const box=document.createElement("div"); box.id="vp";
+  box.innerHTML=`<div class="vhead"><div><span class="vt">${esc(title)}</span></div><button class="vclose" data-vclose>✕ 닫기</button></div><div class="script">${esc(text)}</div>`;
+  slide.appendChild(box);
 }
 function openImage(src,title){
   closeVideo(); vpOpen=true;
