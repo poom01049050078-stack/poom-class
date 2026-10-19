@@ -469,7 +469,7 @@ const VIDEOS = {
   av_monkey:{label:"시청각프로그램 · 원숭이", short:"원숭이", yt:"dLQXgQSMZAw"},
   tkd_aerobic:{label:"태권체조", short:"태권체조", yt:"OiG5gOUIUVA"},
   breaking:{label:"격파 연습 · 재미타·손날·메주먹·위력격파", short:"격파 연습", yt:"WiRMIQ4j9Ho"},
-  jensen:{label:"젠슨 황 대표님 이야기 · 디글 「유 퀴즈 온 더 블럭」", short:"젠슨 황 영상", yt:"Fhor1hYfH-8", start:188, end:355}
+  jensen:{label:"젠슨 황 대표님 이야기", short:"젠슨 황 영상", parts:1}
 };
 /* 유튜브를 화면 안에서 재생할 수 있는 곳(우리 홈페이지)인지: 아티팩트 안에서는 새 창으로 엽니다 */
 const EMBED = /github\.io$/.test(location.hostname) || /[?&]embed=1/.test(location.search);
@@ -652,9 +652,9 @@ function motivSlides(d){
       <div class="mbig">성공하려면<br><em>고생</em>해야 할까?</div><div class="msub">${T("s2","손을 들고 내 생각을 말해 봐요!")}</div>
       ${say("n2","그렇다고 생각하는 친구 손! 아니라고 생각하는 친구 손! → 두세 명 이유를 짧게 듣고 영상으로 넘어가세요.")}`},
     {sid:"m3", label:"젠슨 황 영상", music:"bgm", cls:"s-mot autovid", html:`${brand}<div class="mk">${T("k3","엔비디아 젠슨 황 대표님의 이야기")}</div>
-      <button class="vwrap" data-video="jensen" aria-label="젠슨 황 영상 재생"><img src="https://i.ytimg.com/vi/Fhor1hYfH-8/hqdefault.jpg" alt=""><span>▶ 영상 보기</span></button>
+      <button class="vwrap" data-video="jensen" aria-label="젠슨 황 영상 재생"><img src="assets/jensen_poster.webp" alt=""><span>▶ 영상 보기</span></button>
       <div class="vside">${T("v3","처음부터\n잘된 게 아니래요.\n\n실패해도\n다시 도전했어요!")}</div>
-      <div class="vcap">영상: 디글 :Diggle 「유 퀴즈 온 더 블럭」 (tvN 공식 유튜브) 중 3:08~5:55 부분만 재생 · 인터넷 연결 필요</div>
+      <div class="vcap">영상 2분 46초 · tvN 「유 퀴즈 온 더 블럭」 중 · 도장 수업용</div>
       ${say("n3","영상 뒤: 젠슨 황 대표님도 처음부터 잘된 게 아니래요. 실패해도 다시 도전했기 때문에 지금이 있는 거예요.")}`},
     {sid:"m4", label:"어떤 사람이 될까", music:"bgm", cls:"s-mot", html:`${brand}<div class="mk">${T("k4","AI가 어려운 문제도 풀어 주는 시대")}</div>
       <div class="mbig">그럼 우리는<br><em>어떤 사람</em>이<br>되어야 할까요?</div>
