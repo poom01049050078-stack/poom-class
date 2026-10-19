@@ -640,6 +640,7 @@ function noticeSlide(d){
 
 /* 날짜별 마음 수련(동기부여) 장: 초등부·유치부 공통 */
 const MOTIV = { 26:true };
+const NO_MED = { 26:true };   // 명상 장을 빼는 날
 function motivSlides(d){
   const T=(k,def,tag="span",cls="")=>E("mot."+k,textFor(d,"mot."+k,def),tag,cls);
   const say=(k,def)=>`<div class="say"><b>사범님 멘트</b>${T(k,def)}</div>`;
@@ -707,7 +708,7 @@ function buildDeck(d){
     <div class="acts"><button class="btn dark" data-cue="start">▶ 수련 시작 음성</button>${vidButtons(DEFAULT_VIDEOS["마무리 인사"])}</div>
     <img class="photo" src="assets/${GROUP==="yu"?"m_group_yellow":"m_pair_red"}.webp" alt="도복을 입은 품태권도 모델 수련생들">`});
   const MV=MOTIV[d]?motivSlides(d):null;
-  const flow=[...(MV?[["마음 수련 · 인내 극기 도전","젠슨 황 영상 · 이야기"]]:[]),...(DP&&DP.start?[["시작 멘트",TM["시작 멘트"]||""]]:[]),["음악 명상",""],["이달의 인성",PLAN.virtue.word],...(hasWarmItem?[]:[["준비운동",TM["준비운동"]||"스트레칭"]]),
+  const flow=[...(MV?[["마음 수련 · 인내 극기 도전","젠슨 황 영상 · 이야기"]]:[]),...(DP&&DP.start?[["시작 멘트",TM["시작 멘트"]||""]]:[]),...(NO_MED[d]?[]:[["음악 명상",""]]),["이달의 인성",PLAN.virtue.word],...(hasWarmItem?[]:[["준비운동",TM["준비운동"]||"스트레칭"]]),
     ...items.map((it,k)=>[it.n, (it.g==="품새"?`${itemField(it,"lo")} · ${itemField(it,"hi")}`:GROUPS[it.g]||it.g)+(k===0&&TM["본운동"]?` · 본운동 ${TM["본운동"]}`:""), true]),
     ...(DP&&DP.end?[["종료 멘트",TM["종료 멘트"]||""]]:[]),["마무리 인사",TM["마무리"]||""],["전달사항",""]];
   S.push({sid:"flow", label:"오늘의 수업", music:"bgm", cls:"s-flow", html:`${deco}${brand}
@@ -721,7 +722,7 @@ function buildDeck(d){
     <ol class="promise">${DP.start.map((t,j)=>`<li><b>${j+1}</b>${E("talk1.l"+j,textFor(d,"talk1.l"+j,t))}</li>`).join("")}</ol>
     ${DP.tips?`<div class="tipbox"><i>지도 포인트</i>${DP.tips.map((t,j)=>`<span>· ${E("talk1.t"+j,textFor(d,"talk1.t"+j,t))}</span>`).join("")}</div>`:""}
     <img class="photo" src="assets/m_sit_listen.webp" alt="바르게 앉아 듣는 모델 수련생들">`});
-  S.push({sid:"med", label:"음악 명상", music:"med", cls:"s-med", html:`<div class="ring"></div><div class="ring r2"></div>${brand}
+  if(!NO_MED[d]) S.push({sid:"med", label:"음악 명상", music:"med", cls:"s-med", html:`<div class="ring"></div><div class="ring r2"></div>${brand}
     <div class="center"><div class="eyebrow">MEDITATION</div><h2>음악명상</h2>
     ${E("med.p",textFor(d,"med.p","허리를 펴고 바르게 앉아요\n눈을 감고, 천천히 숨을 들이쉬고 내쉬어요"),"p","","")}</div>`});
   const mi=PLAN.virtue.missions[(d-1)%PLAN.virtue.missions.length];
