@@ -472,7 +472,7 @@ const VIDEOS = {
   av_monkey:{label:"시청각프로그램 · 원숭이", short:"원숭이", yt:"dLQXgQSMZAw"},
   tkd_aerobic:{label:"태권체조", short:"태권체조", yt:"OiG5gOUIUVA"},
   breaking:{label:"격파 연습 · 재미타·손날·메주먹·위력격파", short:"격파 연습", yt:"WiRMIQ4j9Ho"},
-  jensen:{label:"젠슨 황 대표님 이야기", short:"젠슨 황 영상", gd:"1TbZgdZVHXhv_bS7or1wYx-kF54FMYexq"}
+  jensen:{label:"젠슨 황 대표님 이야기", short:"젠슨 황 영상", gd:"1TbZgdZVHXhv_bS7or1wYx-kF54FMYexq", parts:2}
 };
 /* 유튜브를 화면 안에서 재생할 수 있는 곳(우리 홈페이지)인지: 아티팩트 안에서는 새 창으로 엽니다 */
 const EMBED = /github\.io$/.test(location.hostname) || /[?&]embed=1/.test(location.search);
@@ -952,7 +952,7 @@ function openVideo(key){
   if(key.startsWith("yt:")){ const [,id,...t]=key.split(":"); yt=id; v={label:t.join(":")||"영상"}; }
   else { v=VIDEOS[key]; if(!v) return; yt=v.yt||null; }
   closeVideo(); stopCue(false); bgm.pause(); vpOpen=true;
-  const gd=v&&v.gd;
+  const gd=EMBED&&v&&v.gd;   // 홈페이지: 구글 드라이브 영상 · 아티팩트: 같이 올린 영상 파일
   const slide=stage.querySelectorAll(".slide")[cur];
   const box=document.createElement("div"); box.id="vp";
   box.innerHTML=`<div class="vhead"><div><span class="vt">${esc(v.label)}</span><span class="vpart"></span></div><button class="vclose" data-vclose>✕ 닫기</button></div>`+
